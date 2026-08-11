@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warung Pahala</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef7f1;
+  color: #222;
+}
+
+/* HEADER */
+header {
+  position: relative;
+  height: 220px;
+  background-image:
+    linear-gradient(rgba(0,70,40,.35), rgba(0,70,40,.45)),
+    url("masjid.jpg");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.header-content {
+  text-shadow: 2px 2px 5px #000;
+}
+
+.logo {
+  width: 85px;
+  height: 85px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #ffd900;
+  background: white;
+}
+
+header h1 {
+  margin: 7px 0 0;
+  font-size: 27px;
+}
+
+header p {
+  margin: 5px 0;
+}
+
+/* NAV */
+nav {
+  background: #006b45;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+nav button {
+  border: none;
+  padding: 11px 15px;
+  border-radius: 8px;
+  background: #ffd400;
+  color: #064d32;
+  font-weight: bold;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.1);
+}
+
+h2 {
+  color: #006b45;
+}
+
+/* BARANG */
+.search {
+  width: 100%;
+  padding: 13px;
+  border: 2px solid #0a9b62;
+  border-radius: 9px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+  gap: 10px;
+}
+
+.product {
+  border: 2px solid #d8eadd;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f9fff9;
+}
+
+.product h3 {
+  margin: 0 0 7px;
+  color: #006b45;
+}
+
+.price {
+  color: #e49b00;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.stock {
+  font-size: 13px;
+  color: #666;
+  margin: 5px 0;
+}
+
+.product button,
+.btn {
+  width: 100%;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  background: #006b45;
+  color: white;
+  font-weight: bold;
+  margin-top: 7px;
+}
+
+.product button:disabled {
+  background: #aaa;
+}
+
+/* KERANJANG */
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.qty button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: #ffd400;
+  font-weight: bold;
+}
+
+.total {
+  background: #006b45;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 21px;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.checkout {
+  background: #ffd400;
+  color: #004d32;
+  font-size: 17px;
+}
+
+/* FORM */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 5px 0 10px;
+  border: 1px solid #aaa;
+  border-radius: 7px;
+}
+
+/* RIWAYAT */
+.history-item {
+  border-left: 5px solid #006b45;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #f5fff8;
+  border-radius: 6px;
+}
+
+.hidden {
+  display: none;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #006b45;
+  color: white;
+  margin-top: 30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-content">
+    <img src="logo.png" class="logo" alt="Logo Masjid">
+    <h1>WARUNG PAHALA</h1>
+    <p>Masjid Miftahul Jannah</p>
+  </div>
+</header>
+
+<nav>
+  <button onclick="showPage('kasir')">🛒 Kasir</button>
+  <button onclick="showPage('barangPage')">📦 Barang</button>
+  <button onclick="showPage('riwayat')">📋 Riwayat</button>
+</nav>
+
+<div class="container">
+
+<!-- KASIR -->
+<section id="kasir">
+
+  <div class="card">
+    <h2>🛒 Kasir Warung</h2>
+
+    <input
+      type="text"
+      id="search"
+      class="search"
+      placeholder="Cari nama barang..."
+      oninput="tampilkanBarang()"
+    >
+
+    <div id="products" class="products">
+      Memuat barang...
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧺 Keranjang</h2>
+
+    <div id="cart">
+      Keranjang masih kosong.
+    </div>
+
+    <div id="total" class="total">
+      Total: Rp 0
+    </div>
+
+    <button class="btn checkout" onclick="bayar()">
+      💰 BAYAR & SIMPAN TRANSAKSI
+    </button>
+  </div>
+
+</section>
+
+
+<!-- BARANG -->
+<section id="barangPage" class="hidden">
+
+  <div class="card">
+    <h2>📦 Data Barang</h2>
+
+    <p>
+      Data barang diambil langsung dari Firebase Firestore.
+    </p>
+
+    <div id="dataBarang">
+      Memuat...
+    </div>
+  </div>
+
+</section>
+
+
+<!-- RIWAYAT -->
+<section id="riwayat" class="hidden">
+
+  <div class="card">
+    <h2>📋 Riwayat Transaksi</h2>
+
+    <div id="history">
+      Memuat transaksi...
+    </div>
+  </div>
+
+</section>
+
+</div>
+
+<footer>
+  WARUNG PAHALA © 2026<br>
+  Masjid Miftahul Jannah
+</footer>
+
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+
+/* ==============================
+   FIREBASE CONFIG
+   ============================== */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDrhZwbYKZqPLPeZfoEC34wc-Np9cx21Q",
+  authDomain: "warung-pahala-7bedf.firebaseapp.com",
+  projectId: "warung-pahala-7bedf",
+  storageBucket: "warung-pahala-7bedf.firebasestorage.app",
+  messagingSenderId: "278375110629",
+  appId: "1:278375110629:web:a15b5b16df845576a9410c"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+
+/* ==============================
+   DATA
+   ============================== */
+
+let barang = [];
+let keranjang = [];
+
+
+/* ==============================
+   AMBIL BARANG FIREBASE
+   ============================== */
+
+db.collection("barang").onSnapshot(snapshot => {
+
+  barang = [];
+
+  snapshot.forEach(doc => {
+
+    barang.push({
+      id: doc.id,
+      ...doc.data()
+    });
+
+  });
+
+  tampilkanBarang();
+  tampilkanDataBarang();
+
+});
+
+
+/* ==============================
+   TAMPILKAN BARANG
+   ============================== */
+
+function tampilkanBarang() {
+
+  const container = document.getElementById("products");
+
+  const search =
+    document.getElementById("search").value.toLowerCase();
+
+  container.innerHTML = "";
+
+  const hasil = barang.filter(b =>
+    String(b.nama || "")
+      .toLowerCase()
+      .includes(search)
+  );
+
+  if (hasil.length === 0) {
+
+    container.innerHTML =
+      "<p>Barang tidak ditemukan.</p>";
+
+    return;
+  }
+
+  hasil.forEach(b => {
+
+    const stok = Number(b.stok || 0);
+    const harga = Number(b.harga || 0);
+
+    container.innerHTML += `
+
+      <div class="product">
+
+        <h3>${b.nama || "-"}</h3>
+
+        <div class="price">
+          Rp ${formatRupiah(harga)}
+        </div>
+
+        <div class="stock">
+          Stok: ${stok}
+        </div>
+
+        <button
+          onclick="tambahKeranjang('${b.id}')"
+          ${stok <= 0 ? "disabled" : ""}
+        >
+          ${stok <= 0 ? "HABIS" : "TAMBAH"}
+        </button>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+
+/* ==============================
+   TAMBAH KERANJANG
+   ============================== */
+
+function tambahKeranjang(id) {
+
+  const b = barang.find(x => x.id === id);
+
+  if (!b) return;
+
+  const item = keranjang.find(x => x.id === id);
+
+  if (item) {
+
+    if (item.qty < Number(b.stok)) {
+      item.qty++;
+    }
+
+  } else {
+
+    keranjang.push({
+      id: b.id,
+      nama: b.nama,
+      harga: Number(b.harga || 0),
+      qty: 1
+    });
+
+  }
+
+  tampilkanKeranjang();
+
+}
+
+
+/* ==============================
+   TAMPILKAN KERANJANG
+   ============================== */
+
+function tampilkanKeranjang() {
+
+  const container = document.getElementById("cart");
+
+  container.innerHTML = "";
+
+  if (keranjang.length === 0) {
+
+    container.innerHTML =
+      "Keranjang masih kosong.";
+
+    document.getElementById("total").innerHTML =
+      "Total: Rp 0";
+
+    return;
+  }
+
+  let total = 0;
+
+  keranjang.forEach((item, index) => {
+
+    const subtotal =
+      item.harga * item.qty;
+
+    total += subtotal;
+
+    container.innerHTML += `
+
+      <div class="cart-item">
+
+        <div>
+          <b>${item.nama}</b><br>
+          Rp ${formatRupiah(item.harga)}
+        </div>
+
+        <div class="qty">
+
+          <button onclick="kurang(${index})">
+            −
+          </button>
+
+          ${item.qty}
+
+          <button onclick="tambah(${index})">
+            +
+          </button>
+
+        </div>
+
+        <div>
+          Rp ${formatRupiah(subtotal)}
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  document.getElementById("total").innerHTML =
+    "Total: Rp " + formatRupiah(total);
+
+}
+
+
+/* ==============================
+   TAMBAH QTY
+   ============================== */
+
+function tambah(index) {
+
+  const item = keranjang[index];
+
+  const b =
+    barang.find(x => x.id === item.id);
+
+  if (item.qty < Number(b.stok)) {
+
+    item.qty++;
+
+  }
+
+  tampilkanKeranjang();
+
+}
+
+
+/* ==============================
+   KURANG QTY
+   ============================== */
+
+function kurang(index) {
+
+  keranjang[index].qty--;
+
+  if (keranjang[index].qty <= 0) {
+
+    keranjang.splice(index, 1);
+
+  }
+
+  tampilkanKeranjang();
+
+}
+
+
+/* ==============================
+   BAYAR
+   ============================== */
+
+async function bayar() {
+
+  if (keranjang.length === 0) {
+
+    alert("Keranjang masih kosong!");
+
+    return;
+  }
+
+  let total = 0;
+
+  keranjang.forEach(item => {
+
+    total +=
+      item.harga * item.qty;
+
+  });
+
+
+  try {
+
+    /* SIMPAN TRANSAKSI */
+
+    await db.collection("transaksi").add({
+
+      waktu: firebase.firestore.FieldValue.serverTimestamp(),
+
+      items: keranjang,
+
+      total: total
+
+    });
+
+
+    /* KURANGI STOK */
+
+    for (const item of keranjang) {
+
+      const ref =
+        db.collection("barang")
+          .doc(item.id);
+
+      await db.runTransaction(async transaction => {
+
+        const doc =
+          await transaction.get(ref);
+
+        if (!doc.exists) return;
+
+        const stokLama =
+          Number(doc.data().stok || 0);
+
+        const stokBaru =
+          stokLama - item.qty;
+
+        transaction.update(ref, {
+
+          stok: Math.max(0, stokBaru)
+
+        });
+
+      });
+
+    }
+
+
+    alert(
+      "Transaksi berhasil!\n\nTotal: Rp " +
+      formatRupiah(total)
+    );
+
+    keranjang = [];
+
+    tampilkanKeranjang();
+
+    tampilkanRiwayat();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Transaksi gagal: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+/* ==============================
+   DATA BARANG
+   ============================== */
+
+function tampilkanDataBarang() {
+
+  const container =
+    document.getElementById("dataBarang");
+
+  container.innerHTML = "";
+
+  barang.forEach(b => {
+
+    container.innerHTML += `
+
+      <div class="history-item">
+
+        <b>${b.nama}</b><br>
+
+        Harga:
+        Rp ${formatRupiah(Number(b.harga || 0))}
+
+        <br>
+
+        Stok:
+        ${Number(b.stok || 0)}
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+
+/* ==============================
+   RIWAYAT TRANSAKSI
+   ============================== */
+
+async function tampilkanRiwayat() {
+
+  const container =
+    document.getElementById("history");
+
+  container.innerHTML =
+    "Memuat transaksi...";
+
+  try {
+
+    const snapshot =
+      await db.collection("transaksi")
+        .orderBy("waktu", "desc")
+        .limit(30)
+        .get();
+
+    container.innerHTML = "";
+
+    if (snapshot.empty) {
+
+      container.innerHTML =
+        "Belum ada transaksi.";
+
+      return;
+
+    }
+
+    snapshot.forEach(doc => {
+
+      const data = doc.data();
+
+      let tanggal = "-";
+
+      if (data.waktu) {
+
+        tanggal =
+          data.waktu
+            .toDate()
+            .toLocaleString("id-ID");
+
+      }
+
+      container.innerHTML += `
+
+        <div class="history-item">
+
+          <b>${tanggal}</b><br>
+
+          Total:
+          <b>
+            Rp ${formatRupiah(Number(data.total || 0))}
+          </b>
+
+        </div>
+
+      `;
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    container.innerHTML =
+      "Gagal memuat riwayat transaksi.";
+
+  }
+
+}
+
+
+/* ==============================
+   NAVIGASI
+   ============================== */
+
+function showPage(page) {
+
+  document.getElementById("kasir")
+    .classList.add("hidden");
+
+  document.getElementById("barangPage")
+    .classList.add("hidden");
+
+  document.getElementById("riwayat")
+    .classList.add("hidden");
+
+  document.getElementById(page)
+    .classList.remove("hidden");
+
+  if (page === "riwayat") {
+
+    tampilkanRiwayat();
+
+  }
+
+}
+
+
+/* ==============================
+   FORMAT RUPIAH
+   ============================== */
+
+function formatRupiah(angka) {
+
+  return Number(angka || 0)
+    .toLocaleString("id-ID");
+
+}
+
+
+/* ==============================
+   MULAI
+   ============================== */
+
+tampilkanKeranjang();
+
+</script>
+
+</body>
+</html>
