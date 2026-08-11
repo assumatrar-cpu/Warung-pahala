@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WARUNG PAHALA - Kasir</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f4f6f8;color:#222}
+header{background:#f57c00;color:#fff;text-align:center;padding:17px;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:24px}main{max-width:950px;margin:auto;padding:12px}
+.box{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #0002}
+input,button{font-size:16px;padding:11px;border-radius:8px}input{width:100%;border:1px solid #ddd}button{border:0;background:#f57c00;color:white;font-weight:bold;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.item{border:1px solid #ddd;border-radius:10px;padding:10px}.price{color:#e65100;font-weight:bold;margin:6px 0}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.actions button{flex:1;min-width:100px}
+table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.total{font-size:22px;font-weight:bold;text-align:right;color:#e65100}
+.small{font-size:13px;color:#666}.danger{background:#d32f2f}.gray{background:#607d8b}.green{background:#2e7d32}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;padding:20px}
+.modalbox{background:white;max-width:500px;margin:60px auto;padding:18px;border-radius:12px}
+.modalbox input{margin:6px 0 12px}
+</style></head>
+<body>
+<header><h1>WARUNG PAHALA</h1><div>KASIR WARUNG</div></header>
+<main>
+<section class="box">
+<h2>Kelola Barang</h2>
+<p class="small">Anda bisa <b>menambah, mengedit nama/harga, atau menghapus barang</b>. Perubahan tersimpan di HP/browser ini.</p>
+<div class="actions">
+<button onclick="openAdd()">+ Tambah Barang</button>
+<button class="gray" onclick="exportData()">Cadangkan Data</button>
+<button class="green" onclick="document.getElementById('file').click()">Import Data</button>
+<input id="file" type="file" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+</section>
+<section class="box">
+<h2>Daftar Barang</h2>
+<input id="search" placeholder="🔎 Cari barang..." oninput="renderProducts()">
+<br><br><div id="products" class="grid"></div>
+</section>
+<section class="box">
+<h2>Keranjang</h2>
+<div style="overflow:auto"><table><thead><tr><th>Barang</th><th>Harga</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
+<tbody id="cart"></tbody></table></div>
+<p class="total">Total: <span id="total">Rp0</span></p>
+<input id="payment" type="number" placeholder="Uang dibayar" oninput="totals()">
+<p class="total">Kembalian: <span id="change">Rp0</span></p>
+<div class="actions"><button class="danger" onclick="clearCart()">Kosongkan</button><button onclick="printReceipt()">Cetak Struk</button></div>
+</section>
+</main>
+
+<div id="modal" class="modal"><div class="modalbox">
+<h2 id="modalTitle">Tambah Barang</h2>
+<input id="editName" placeholder="Nama barang">
+<input id="editPrice" type="number" min="0" placeholder="Harga (Rp)">
+<div class="actions"><button class="gray" onclick="closeModal()">Batal</button><button onclick="saveProduct()">Simpan</button></div>
+</div></div>
+
+<script>
+const initial=[{"name": "ASAM JAWA", "price": 3500}, {"name": "BAWANG GORENG", "price": 3500}, {"name": "BIHUN", "price": 3000}, {"name": "CABE 1KG", "price": 7000}, {"name": "CABE 250gr", "price": 3500}, {"name": "DAUN JERUK", "price": 3500}, {"name": "DAUN SALAM", "price": 3500}, {"name": "DAUN SERE", "price": 3500}, {"name": "GULA MERAH", "price": 10000}, {"name": "GULA MERAH BEKU", "price": 5000}, {"name": "IKAN ASAP", "price": 9000}, {"name": "IKAN BANDENG", "price": 8000}, {"name": "IKAN LELE", "price": 6500}, {"name": "IKAN TONGKOL", "price": 7000}, {"name": "INDOMIE", "price": 800}, {"name": "JEPROX", "price": 4000}, {"name": "KECAP BANGAU BESAR", "price": 7000}, {"name": "KECAP BANGAU KECIL", "price": 4000}, {"name": "KEMIRI", "price": 4000}, {"name": "KENCUR", "price": 3500}, {"name": "KERUPUK BAWANG", "price": 3500}, {"name": "KERUPUK MENTAH", "price": 3500}, {"name": "KERUPUK PALEMBANG BAWANG SUPER", "price": 4000}, {"name": "KERUPUK TEMPE", "price": 4000}, {"name": "KETUMBAR", "price": 3000}, {"name": "KOKITA SAMBAL CABAI", "price": 3500}, {"name": "KUNYIT BEKU", "price": 3500}, {"name": "KUNYIT BUBUK", "price": 3500}, {"name": "LENGKUAS", "price": 3500}, {"name": "MIE 2 TELUR", "price": 2500}, {"name": "MITOSE", "price": 3500}, {"name": "PETE", "price": 6000}, {"name": "RENGGINANG", "price": 3500}, {"name": "SAMBEL PECEL", "price": 4000}, {"name": "SAUS ABC", "price": 4000}, {"name": "SAUS BELIBIS", "price": 5000}, {"name": "ABC KOPI SUSU", "price": 2500}, {"name": "ABC MIE CUP", "price": 2500}, {"name": "AYAM POTONG K.M.F", "price": 8000}, {"name": "AYAM UTUH K.M.F", "price": 8000}, {"name": "AYAM UTUH SERA", "price": 8000}, {"name": "BABAT", "price": 8000}, {"name": "BAKSO BEJO", "price": 25000}, {"name": "BENG-BENG", "price": 5000}, {"name": "BUNCIS", "price": 6500}, {"name": "COFE CANDY", "price": 2000}, {"name": "DADA AYAM SERA", "price": 15000}, {"name": "DAGING BEBEK UTUH", "price": 25000}, {"name": "DAGING KAMBING", "price": 16500}, {"name": "DAGING SAPI 1 KG", "price": 16500}, {"name": "DAGING SAPI SERUT", "price": 16500}, {"name": "DEKA WAFER ROLL", "price": 5000}, {"name": "DEKA WAFER ROLL JUMBO", "price": 5000}, {"name": "DUA KELINCI KACANG GARING", "price": 3500}, {"name": "DUA KELINCI KACANG RASA BAWANG", "price": 3500}, {"name": "DUO RABBIT SPACY", "price": 2500}, {"name": "ENERGEN", "price": 3000}, {"name": "ESTE EMJE", "price": 3000}, {"name": "FRISIAN FLAG KALENG", "price": 3500}, {"name": "FRISIAN FLAG KEMASAN EKONOMIS", "price": 5000}, {"name": "GARUDA KACANG ATOM", "price": 3000}, {"name": "HATI AMPELA", "price": 6000}, {"name": "KACANG SHANGHAI", "price": 2500}, {"name": "KACANG TELUR", "price": 3000}, {"name": "KAPAL API SPESIAL MIX", "price": 2500}, {"name": "KERIPIK PISANG", "price": 3500}, {"name": "KERIPIK PISANG SALE", "price": 3500}, {"name": "KOPI GULA MELAKA", "price": 6500}, {"name": "KERIPIK TEMPE", "price": 4000}, {"name": "ULTRAFLU", "price": 4000}, {"name": "KOMIX", "price": 1000}, {"name": "TOLAK ANGIN", "price": 1000}, {"name": "KOYO CABE", "price": 5000}, {"name": "MINYAK KAYU PUTIH BESAR", "price": 6000}, {"name": "SUPERTETRA", "price": 5000}, {"name": "PANADOL", "price": 4000}, {"name": "FRESHCARE", "price": 6000}, {"name": "BODREX", "price": 8000}, {"name": "MINYAK WANGI", "price": 6000}, {"name": "BALSEM GELIGA", "price": 5000}, {"name": "SALEB 88", "price": 4000}, {"name": "OSKADON", "price": 2000}, {"name": "PROMAGH", "price": 5000}, {"name": "NEOREMACYL", "price": 6000}, {"name": "BODREX FLU DAN BATUK", "price": 3000}, {"name": "MINYAK KAYU PUTIH KECIL", "price": 5000}, {"name": "CEKER AYAM", "price": 7000}, {"name": "ONDE ONDE", "price": 6500}, {"name": "BAKSO IKAN BUMIFOOD", "price": 6500}, {"name": "OTAK-OTAK", "price": 5000}, {"name": "TAHU BAKSO SEAFOOD", "price": 5000}, {"name": "DUMPLING ISI AYAM", "price": 5000}, {"name": "BAKSO IKAN", "price": 5000}, {"name": "KULIT LUMPIA", "price": 7000}, {"name": "KENCUR", "price": 6000}, {"name": "BAMBOE", "price": 1250}, {"name": "MASAKO AYAM", "price": 3000}, {"name": "MASAKO SAPI", "price": 3000}, {"name": "ROYCO AYAM", "price": 3000}, {"name": "ROYCO SAPI", "price": 3000}, {"name": "SANTAN", "price": 5000}, {"name": "SAMBAL BAWANG", "price": 5000}, {"name": "SAMBAL TRASI", "price": 5000}, {"name": "SAMBAL HIJAU", "price": 5000}, {"name": "GARAM", "price": 2500}, {"name": "GULA", "price": 2500}, {"name": "AJINOMOTO", "price": 3500}, {"name": "BUMBU KUAH BAKSO", "price": 2500}, {"name": "MINYAK", "price": 8000}, {"name": "BAWANG MERAH", "price": 3500}, {"name": "TELUR", "price": 8000}, {"name": "SURYA 16", "price": 7000}, {"name": "ASAMPOERNA", "price": 7000}, {"name": "DJI SAM SOE", "price": 7000}, {"name": "SIWAK", "price": 4000}, {"name": "KOPI TANAKA", "price": 1000}, {"name": "DAUN SALAM", "price": 3500}, {"name": "KUSUKA KRIPIK SINGKONG", "price": 4000}, {"name": "MALKIST", "price": 1500}, {"name": "PISANG BEKU", "price": 6500}, {"name": "RISOL", "price": 6500}, {"name": "ROMA KELAPA", "price": 2500}, {"name": "SARI GANDUM", "price": 1500}, {"name": "SERENA LEMONIA", "price": 1500}, {"name": "SERENA TROY", "price": 1500}, {"name": "SLAI OLAI", "price": 2500}, {"name": "SUKRO", "price": 2000}, {"name": "SUSU JAHE", "price": 2500}, {"name": "TANGO", "price": 2500}, {"name": "TEH 2 TANG BLACK TEA", "price": 2000}, {"name": "TEH JASMINE 2 TANG", "price": 3500}, {"name": "COUNTRY JUS JAMBU", "price": 1500}, {"name": "COUNTRY JUS MANGGA", "price": 1500}, {"name": "LARUTAN", "price": 2000}, {"name": "NU GREN TEA", "price": 2000}, {"name": "SARI ASAM", "price": 1500}, {"name": "SARI KACANG HIJAU", "price": 1500}, {"name": "SODA", "price": 1500}, {"name": "TEH BOTOL 250 ml", "price": 1000}, {"name": "TELBOTOL 1L", "price": 3000}, {"name": "TASCO", "price": 2000}, {"name": "TEBS", "price": 1500}, {"name": "FREEZE", "price": 1500}, {"name": "LAPIS LEGIT", "price": 5000}, {"name": "HIDRO COCO 250 ML", "price": 1500}, {"name": "HIDRO COCO 330 ML", "price": 2000}, {"name": "NATA DECOCO", "price": 4000}, {"name": "FRUIT TEA", "price": 2000}, {"name": "TERASI 1 PAK", "price": 8000}];
+let products=JSON.parse(localStorage.getItem("warung_products_v2")||"null")||initial;
+let cart=[],editIndex=-1;
+const rp=n=>"Rp"+Number(n||0).toLocaleString("id-ID");
+function save(){localStorage.setItem("warung_products_v2",JSON.stringify(products))}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function renderProducts(){
+ let q=document.getElementById("search").value.toLowerCase();
+ let list=products.map((p,i)=>({p,i})).filter(x=>x.p.name.toLowerCase().includes(q));
+ document.getElementById("products").innerHTML=list.map(x=>`<div class="item">
+ <b>${esc(x.p.name)}</b><div class="price">${rp(x.p.price)}</div>
+ <div class="actions"><button onclick="add(${x.i})">Tambah</button><button class="gray" onclick="edit(${x.i})">Edit</button><button class="danger" onclick="del(${x.i})">Hapus</button></div>
+ </div>`).join("")||"<p>Barang tidak ditemukan.</p>";
+}
+function openAdd(){editIndex=-1;modalTitle.textContent="Tambah Barang";editName.value="";editPrice.value="";modal.style.display="block"}
+function edit(i){editIndex=i;modalTitle.textContent="Edit Barang";editName.value=products[i].name;editPrice.value=products[i].price;modal.style.display="block"}
+function closeModal(){modal.style.display="none"}
+function saveProduct(){
+ let n=editName.value.trim(),p=Number(editPrice.value);
+ if(!n||p<=0)return alert("Nama dan harga harus diisi.");
+ if(editIndex<0)products.push({name:n,price:p});else{products[editIndex].name=n;products[editIndex].price=p}
+ save();closeModal();renderProducts();renderCart();
+}
+function del(i){if(confirm("Hapus "+products[i].name+"?")){products.splice(i,1);save();renderProducts();}}
+function add(i){let p=products[i],x=cart.find(x=>x.name===p.name&&x.price===p.price);if(x)x.qty++;else cart.push({...p,qty:1});renderCart()}
+function qty(i,d){cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);renderCart()}
+function total(){return cart.reduce((s,x)=>s+x.price*x.qty,0)}
+function renderCart(){
+ document.getElementById("cart").innerHTML=cart.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${rp(x.price)}</td><td>${x.qty}</td><td>${rp(x.price*x.qty)}</td><td><button onclick="qty(${i},1)">+</button><button class="gray" onclick="qty(${i},-1)">−</button></td></tr>`).join("")||'<tr><td colspan="5">Keranjang kosong</td></tr>';
+ totals();
+}
+function totals(){let t=total(),p=Number(payment.value||0);document.getElementById("total").textContent=rp(t);document.getElementById("change").textContent=rp(Math.max(0,p-t))}
+function clearCart(){cart=[];payment.value="";renderCart()}
+function printReceipt(){if(!cart.length)return alert("Keranjang kosong.");let t=total(),p=Number(payment.value||0);if(p<t)return alert("Pembayaran kurang.");let s="WARUNG PAHALA\n----------------\n"+cart.map(x=>x.name+" x"+x.qty+" = "+rp(x.price*x.qty)).join("\n")+"\n----------------\nTOTAL: "+rp(t)+"\nBAYAR: "+rp(p)+"\nKEMBALI: "+rp(p-t);let w=open("","_blank");w.document.write("<pre>"+esc(s)+"</pre>");w.print()}
+function exportData(){let blob=new Blob([JSON.stringify(products,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="data-warung-pahala.json";a.click()}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;products=d.filter(x=>x.name&&Number(x.price)>0).map(x=>({name:String(x.name),price:Number(x.price)}));save();renderProducts();alert("Data berhasil diimport.");}catch{alert("File data tidak valid.")}};r.readAsText(f)}
+renderProducts();renderCart();
+</script></body></html>
