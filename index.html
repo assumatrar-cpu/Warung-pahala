@@ -275,6 +275,22 @@ input {
   font-weight: bold;
 }
 
+  .btn-cetak-riwayat {
+  width: 100%;
+  border: none;
+  padding: 11px;
+  margin-top: 12px;
+  border-radius: 8px;
+  background: #1565c0;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn-cetak-riwayat:active {
+  transform: scale(.98);
+}
+
 .btn-struk-riwayat {
   width: 100%;
   border: none;
@@ -1295,6 +1311,7 @@ async function tampilkanRiwayat() {
           data.waktu
             .toDate()
             .toLocaleString("id-ID");
+
       }
 
       let daftarBarang = "";
@@ -1318,6 +1335,7 @@ async function tampilkanRiwayat() {
 
               <div>
                 <b>${item.nama || "-"}</b><br>
+
                 <small>
                   ${qty} × Rp ${formatRupiah(harga)}
                 </small>
@@ -1394,6 +1412,13 @@ async function tampilkanRiwayat() {
 
           </div>
 
+          <button
+            class="btn-cetak-riwayat"
+            onclick="cetakUlangStruk('${doc.id}')"
+          >
+            🧾 CETAK STRUK
+          </button>
+
         </div>
 
       `;
@@ -1450,6 +1475,62 @@ function formatRupiah(angka) {
     .toLocaleString("id-ID");
 
 }
+
+  async function cetakUlangStruk(id) {
+
+  try {
+
+    const doc =
+      await db.collection("transaksi")
+        .doc(id)
+        .get();
+
+    if (!doc.exists) {
+
+      alert("Transaksi tidak ditemukan.");
+      return;
+
+    }
+
+    const data = doc.data();
+
+    const items =
+      Array.isArray(data.items)
+        ? data.items
+        : [];
+
+    const total =
+      Number(data.total || 0);
+
+    const uangBayar =
+      Number(data.uangBayar || 0);
+
+    const kembalian =
+      Number(data.kembalian || 0);
+
+    const nomorTransaksi =
+      data.nomorTransaksi || "-";
+
+    tampilkanStruk(
+      items,
+      total,
+      uangBayar,
+      kembalian,
+      nomorTransaksi
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Gagal mencetak struk:\n" +
+      error.message
+    );
+
+  }
+
+  }
 
   async function tambahBarang() {
   const nama = document.getElementById("namaBarangBaru").value.trim();
