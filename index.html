@@ -737,15 +737,29 @@ footer {
 
 
 <!-- RIWAYAT -->
-<section id="riwayat" class="hidden">
+<section id="riwayat">
 
   <div class="card">
     <h2>📋 Riwayat Transaksi</h2>
 
+    <!-- PENCARIAN TRANSAKSI -->
+    <div class="riwayat-search">
+      <input
+        type="text"
+        id="searchTransaksi"
+        placeholder="🔍 Cari nomor transaksi atau tanggal..."
+        oninput="tampilkanRiwayat()"
+      >
+    </div>
+
+    <!-- DAFTAR TRANSAKSI -->
     <div id="history">
       Memuat transaksi...
     </div>
+
   </div>
+
+</section>
 
 </section>
 
@@ -1331,27 +1345,24 @@ function tampilkanDataBarang() {
 
 async function tampilkanRiwayat() {
 
-  const container =
-    document.getElementById("history");
+  const container = document.getElementById("history");
 
-  const input =
-    document.getElementById("cariTransaksi");
-
-  const kataKunci =
-    input
-      ? input.value.trim().toLowerCase()
-      : "";
-
-  container.innerHTML =
-    "Memuat transaksi...";
+  container.innerHTML = "Memuat transaksi...";
 
   try {
 
-    const snapshot =
-      await db.collection("transaksi")
-        .orderBy("waktu", "desc")
-        .limit(100)
-        .get();
+    const snapshot = await db.collection("transaksi")
+      .orderBy("waktu", "desc")
+      .limit(100)
+      .get();
+
+    const searchInput =
+      document.getElementById("searchTransaksi");
+
+    const kataCari =
+      searchInput
+        ? searchInput.value.trim().toLowerCase()
+        : "";
 
     container.innerHTML = "";
 
@@ -1361,62 +1372,54 @@ async function tampilkanRiwayat() {
 
       const data = doc.data();
 
-      /* NOMOR TRANSAKSI */
-      const nomor =
-        String(data.nomorTransaksi || "")
-          .toLowerCase();
+      /* =========================
+         NOMOR TRANSAKSI
+      ========================= */
 
-      /* TANGGAL */
+      const nomor =
+        String(data.nomorTransaksi || "").toLowerCase();
+
+
+      /* =========================
+         TANGGAL
+      ========================= */
+
       let tanggal = "-";
-      let tanggalCari = "";
 
       if (data.waktu) {
 
-        const waktu = data.waktu.toDate();
-
         tanggal =
-          waktu.toLocaleString("id-ID");
+          data.waktu
+            .toDate()
+            .toLocaleString("id-ID");
 
-        tanggalCari =
-          waktu.toLocaleDateString("id-ID");
       }
 
-      /* NAMA BARANG */
-      let namaBarang = "";
+      const tanggalCari =
+        tanggal.toLowerCase();
 
-      if (Array.isArray(data.items)) {
 
-        namaBarang =
-          data.items
-            .map(item =>
-              String(item.nama || "")
-            )
-            .join(" ")
-            .toLowerCase();
+      /* =========================
+         CEK PENCARIAN
+      ========================= */
+
+      if (
+        kataCari !== "" &&
+        !nomor.includes(kataCari) &&
+        !tanggalCari.includes(kataCari)
+      ) {
+
+        return;
+
       }
 
-      /*
-       * Jika ada pencarian,
-       * cocokkan dengan:
-       * nomor transaksi
-       * tanggal
-       * nama barang
-       */
-      if (kataKunci !== "") {
-
-        const cocok =
-          nomor.includes(kataKunci) ||
-          tanggalCari.includes(kataKunci) ||
-          namaBarang.includes(kataKunci);
-
-        if (!cocok) {
-          return;
-        }
-      }
 
       jumlahDitemukan++;
 
-      /* DAFTAR BARANG */
+
+      /* =========================
+         DAFTAR BARANG
+      ========================= */
 
       let daftarBarang = "";
 
@@ -1424,82 +1427,111 @@ async function tampilkanRiwayat() {
 
         data.items.forEach(item => {
 
-          const subtotal =
-            Number(item.harga || 0) *
+          const qty =
             Number(item.qty || 0);
 
+          const harga =
+            Number(item.harga || 0);
+
+          const subtotal =
+            harga * qty;
+
           daftarBarang += `
-            <div class="history-product">
-              <b>${item.nama || "-"}</b>
-              × ${item.qty || 0}
+
+            <div class="riwayat-barang-item">
+
+              <span>
+                ${item.nama || "-"} × ${qty}
+              </span>
+
               <span>
                 Rp ${formatRupiah(subtotal)}
               </span>
+
             </div>
+
           `;
 
         });
 
       }
 
-      /* TAMPILKAN TRANSAKSI */
+
+      /* =========================
+         TAMPILKAN TRANSAKSI
+      ========================= */
 
       container.innerHTML += `
 
         <div class="history-item">
 
-          <div class="history-header">
+          <div class="riwayat-header">
 
-            <b>
+            <div class="riwayat-nomor">
               🧾 ${data.nomorTransaksi || "-"}
-            </b>
+            </div>
+
+            <div class="riwayat-tanggal">
+              🕐 ${tanggal}
+            </div>
+
+          </div>
+
+
+          <div class="riwayat-label">
+            🛍️ Barang
+          </div>
+
+
+          <div class="riwayat-barang">
+
+            ${daftarBarang}
+
+          </div>
+
+
+          <div class="riwayat-total">
+
+            <span>Total</span>
 
             <span>
-              🕐 ${tanggal}
+              Rp ${formatRupiah(
+                Number(data.total || 0)
+              )}
             </span>
 
           </div>
 
-          <hr>
 
-          <div class="history-label">
-            🛍️ Barang
-          </div>
-
-          ${daftarBarang}
-
-          <hr>
-
-          <div class="history-total">
+          <div class="riwayat-pembayaran">
 
             <div>
-              <span>Total</span>
+              💵 Tunai:
               <b>
-                Rp ${formatRupiah(
-                  Number(data.total || 0)
-                )}
-              </b>
-            </div>
-
-            <div>
-              <span>Tunai</span>
-              <span>
                 Rp ${formatRupiah(
                   Number(data.uangBayar || 0)
                 )}
-              </span>
-            </div>
-
-            <div>
-              <span>Kembalian</span>
-              <b>
-                Rp ${formatRupiah(
-                  Number(data.kembalian || 0)
-                )}
               </b>
             </div>
 
+            <div class="riwayat-kembalian">
+
+              🔄 Kembalian:
+              Rp ${formatRupiah(
+                Number(data.kembalian || 0)
+              )}
+
+            </div>
+
           </div>
+
+
+          <button
+            class="btn-cetak-riwayat"
+            onclick="cetakRiwayat('${doc.id}')"
+          >
+            🖨️ Cetak Struk
+          </button>
 
         </div>
 
@@ -1507,16 +1539,19 @@ async function tampilkanRiwayat() {
 
     });
 
-    /* TIDAK ADA HASIL */
+
+    /* =========================
+       JIKA TIDAK ADA HASIL
+    ========================= */
 
     if (jumlahDitemukan === 0) {
 
-      if (kataKunci !== "") {
+      if (kataCari !== "") {
 
         container.innerHTML = `
           <div class="history-item">
             🔍 Transaksi
-            <b>"${kataKunci}"</b>
+            <b>"${kataCari}"</b>
             tidak ditemukan.
           </div>
         `;
@@ -1534,8 +1569,12 @@ async function tampilkanRiwayat() {
 
     console.error(error);
 
-    container.innerHTML =
-      "❌ Gagal memuat riwayat transaksi.";
+    container.innerHTML = `
+      <div class="history-item">
+        ❌ Gagal memuat riwayat:<br>
+        ${error.message}
+      </div>
+    `;
 
   }
 
