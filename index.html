@@ -796,6 +796,58 @@ footer {
       >
     </div>
 
+    <button
+      class="btn"
+      onclick="tampilkanLaporanBulanan()">
+      🔄 Refresh Laporan
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- BARANG -->
+<section id="barangPage" class="hidden">
+
+  <div class="card">
+  <h2>➕ Tambah Barang</h2>
+
+  <input
+    type="text"
+    id="namaBarangBaru"
+    placeholder="Nama barang"
+  >
+
+  <input
+    type="number"
+    id="hargaBarangBaru"
+    placeholder="Harga"
+  >
+
+  <input
+    type="number"
+    id="stokBarangBaru"
+    placeholder="Stok"
+  >
+
+  <button class="btn" onclick="tambahBarang()">
+    💾 Simpan Barang
+  </button>
+  </div>
+
+  <div class="card">
+    <h2>📦 Data Barang</h2>
+
+    <p>
+      Data barang diambil langsung dari Firebase Firestore.
+    </p>
+
+    <div id="dataBarang">
+      Memuat...
+    </div>
+  </div>
+
     <!-- LAPORAN PENJUALAN -->
 <section id="laporanPage" class="hidden">
 
