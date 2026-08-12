@@ -1277,56 +1277,40 @@ async function hapusBarang(id) {
   kodeTransaksi
 ) {
 
-  const container =
-    document.getElementById("struk");
+  const struk = document.getElementById("struk");
 
-  const sekarang =
-    new Date().toLocaleString("id-ID");
-
-  let daftarBarang = "";
+  let daftar = "";
 
   items.forEach(item => {
 
-    const harga =
-      Number(item.harga || 0);
-
-    const qty =
-      Number(item.qty || 0);
-
     const subtotal =
-      harga * qty;
+      Number(item.harga) * Number(item.qty);
 
-    daftarBarang += `
+    daftar += `
       <div class="nota-item">
-
         <div class="nota-nama">
-          ${item.nama || "-"}
+          ${item.nama}
         </div>
 
         <div class="nota-detail">
-          ${qty} x Rp ${formatRupiah(harga)}
-
+          ${item.qty} x Rp ${formatRupiah(item.harga)}
           <span>
             Rp ${formatRupiah(subtotal)}
           </span>
         </div>
-
       </div>
     `;
-
   });
 
-  container.classList.remove("hidden");
+  struk.classList.remove("hidden");
 
-  container.innerHTML = `
+  struk.innerHTML = `
 
     <div class="nota">
 
       <div class="nota-header">
 
-        <div class="nota-logo">
-          🕌
-        </div>
+        <div class="nota-logo">🛒</div>
 
         <div class="nota-title">
           WARUNG PAHALA
@@ -1345,43 +1329,36 @@ async function hapusBarang(id) {
       <div class="nota-garis"></div>
 
       <div class="nota-info">
+        <div>
+          No: <b>${kodeTransaksi}</b>
+        </div>
 
-        <span>Tanggal</span>
-        <span>${sekarang}</span>
-
+        <div>
+          ${new Date().toLocaleDateString("id-ID")}
+        </div>
       </div>
 
       <div class="nota-garis"></div>
 
-      <div class="nota-barang">
-
-        ${daftarBarang}
-
-      </div>
+      ${daftar}
 
       <div class="nota-garis"></div>
 
       <div class="nota-total">
 
         <div>
-          TOTAL
-          <span>
-            Rp ${formatRupiah(total)}
-          </span>
+          <span>TOTAL</span>
+          <span>Rp ${formatRupiah(total)}</span>
         </div>
 
         <div>
-          UANG BAYAR
-          <span>
-            Rp ${formatRupiah(uangBayar)}
-          </span>
+          <span>TUNAI</span>
+          <span>Rp ${formatRupiah(uangBayar)}</span>
         </div>
 
         <div class="nota-kembalian">
-          KEMBALIAN
-          <span>
-            Rp ${formatRupiah(kembalian)}
-          </span>
+          <span>KEMBALI</span>
+          <span>Rp ${formatRupiah(kembalian)}</span>
         </div>
 
       </div>
@@ -1389,21 +1366,15 @@ async function hapusBarang(id) {
       <div class="nota-garis"></div>
 
       <div class="nota-terima">
-
-        TERIMA KASIH 🙏<br>
-        Atas pembelian Anda
-
-        <br><br>
-
-        Semoga berkah
-
+        Terima kasih telah berbelanja<br>
+        di WARUNG PAHALA 🙏
       </div>
 
       <button
         class="btn btn-cetak"
         onclick="cetakStruk()"
       >
-        🖨️ CETAK / SIMPAN STRUK
+        🖨️ CETAK STRUK
       </button>
 
     </div>
