@@ -203,6 +203,65 @@ input {
   border-radius: 6px;
 }
 
+  .history-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.history-header span {
+  color: #666;
+  font-size: 11px;
+}
+
+.history-label {
+  font-weight: bold;
+  color: #006b45;
+  margin-bottom: 8px;
+}
+
+.history-product {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.history-product span {
+  white-space: nowrap;
+}
+
+.history-total {
+  line-height: 1.8;
+  font-size: 13px;
+}
+
+.history-total div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.history-total div:first-child {
+  font-size: 15px;
+  color: #006b45;
+}
+
+  .riwayat-search {
+  margin-bottom: 15px;
+}
+
+.riwayat-search input {
+  width: 100%;
+  padding: 13px;
+  border: 2px solid #006b45;
+  border-radius: 9px;
+  font-size: 15px;
+}
+
   /* RIWAYAT KASIR RAPI */
 
 .history-item {
@@ -1275,6 +1334,14 @@ async function tampilkanRiwayat() {
   const container =
     document.getElementById("history");
 
+  const input =
+    document.getElementById("cariTransaksi");
+
+  const kataKunci =
+    input
+      ? input.value.trim().toLowerCase()
+      : "";
+
   container.innerHTML =
     "Memuat transaksi...";
 
@@ -1283,36 +1350,73 @@ async function tampilkanRiwayat() {
     const snapshot =
       await db.collection("transaksi")
         .orderBy("waktu", "desc")
-        .limit(30)
+        .limit(100)
         .get();
 
     container.innerHTML = "";
 
-    if (snapshot.empty) {
-
-      container.innerHTML =
-        "<p>Belum ada transaksi.</p>";
-
-      return;
-    }
+    let jumlahDitemukan = 0;
 
     snapshot.forEach(doc => {
 
       const data = doc.data();
 
+      /* NOMOR TRANSAKSI */
       const nomor =
-        data.nomorTransaksi || "-";
+        String(data.nomorTransaksi || "")
+          .toLowerCase();
 
+      /* TANGGAL */
       let tanggal = "-";
+      let tanggalCari = "";
 
       if (data.waktu) {
 
-        tanggal =
-          data.waktu
-            .toDate()
-            .toLocaleString("id-ID");
+        const waktu = data.waktu.toDate();
 
+        tanggal =
+          waktu.toLocaleString("id-ID");
+
+        tanggalCari =
+          waktu.toLocaleDateString("id-ID");
       }
+
+      /* NAMA BARANG */
+      let namaBarang = "";
+
+      if (Array.isArray(data.items)) {
+
+        namaBarang =
+          data.items
+            .map(item =>
+              String(item.nama || "")
+            )
+            .join(" ")
+            .toLowerCase();
+      }
+
+      /*
+       * Jika ada pencarian,
+       * cocokkan dengan:
+       * nomor transaksi
+       * tanggal
+       * nama barang
+       */
+      if (kataKunci !== "") {
+
+        const cocok =
+          nomor.includes(kataKunci) ||
+          tanggalCari.includes(kataKunci) ||
+          namaBarang.includes(kataKunci);
+
+        if (!cocok) {
+          return;
+        }
+      }
+
+      jumlahDitemukan++;
+
+      /* DAFTAR BARANG */
 
       let daftarBarang = "";
 
@@ -1320,104 +1424,82 @@ async function tampilkanRiwayat() {
 
         data.items.forEach(item => {
 
-          const harga =
-            Number(item.harga || 0);
-
-          const qty =
+          const subtotal =
+            Number(item.harga || 0) *
             Number(item.qty || 0);
 
-          const subtotal =
-            harga * qty;
-
           daftarBarang += `
-
-            <div class="riwayat-barang-item">
-
-              <div>
-                <b>${item.nama || "-"}</b><br>
-
-                <small>
-                  ${qty} × Rp ${formatRupiah(harga)}
-                </small>
-              </div>
-
-              <div>
-                <b>
-                  Rp ${formatRupiah(subtotal)}
-                </b>
-              </div>
-
+            <div class="history-product">
+              <b>${item.nama || "-"}</b>
+              × ${item.qty || 0}
+              <span>
+                Rp ${formatRupiah(subtotal)}
+              </span>
             </div>
-
           `;
 
         });
 
       }
 
-      const total =
-        Number(data.total || 0);
-
-      const uangBayar =
-        Number(data.uangBayar || 0);
-
-      const kembalian =
-        Number(data.kembalian || 0);
+      /* TAMPILKAN TRANSAKSI */
 
       container.innerHTML += `
 
         <div class="history-item">
 
-          <div class="riwayat-header">
+          <div class="history-header">
 
-            <div class="riwayat-nomor">
-              🧾 ${nomor}
-            </div>
-
-            <div class="riwayat-tanggal">
-              🕐 ${tanggal}
-            </div>
-
-          </div>
-
-          <div class="riwayat-barang">
-
-            ${daftarBarang}
-
-          </div>
-
-          <div class="riwayat-total">
-
-            <span>TOTAL</span>
-
-            <span>
-              Rp ${formatRupiah(total)}
-            </span>
-
-          </div>
-
-          <div class="riwayat-pembayaran">
-
-            💵 Tunai:
             <b>
-              Rp ${formatRupiah(uangBayar)}
+              🧾 ${data.nomorTransaksi || "-"}
             </b>
 
-            <br>
-
-            🔄 Kembalian:
-            <span class="riwayat-kembalian">
-              Rp ${formatRupiah(kembalian)}
+            <span>
+              🕐 ${tanggal}
             </span>
 
           </div>
 
-          <button
-            class="btn-cetak-riwayat"
-            onclick="cetakUlangStruk('${doc.id}')"
-          >
-            🧾 CETAK STRUK
-          </button>
+          <hr>
+
+          <div class="history-label">
+            🛍️ Barang
+          </div>
+
+          ${daftarBarang}
+
+          <hr>
+
+          <div class="history-total">
+
+            <div>
+              <span>Total</span>
+              <b>
+                Rp ${formatRupiah(
+                  Number(data.total || 0)
+                )}
+              </b>
+            </div>
+
+            <div>
+              <span>Tunai</span>
+              <span>
+                Rp ${formatRupiah(
+                  Number(data.uangBayar || 0)
+                )}
+              </span>
+            </div>
+
+            <div>
+              <span>Kembalian</span>
+              <b>
+                Rp ${formatRupiah(
+                  Number(data.kembalian || 0)
+                )}
+              </b>
+            </div>
+
+          </div>
 
         </div>
 
@@ -1425,13 +1507,35 @@ async function tampilkanRiwayat() {
 
     });
 
+    /* TIDAK ADA HASIL */
+
+    if (jumlahDitemukan === 0) {
+
+      if (kataKunci !== "") {
+
+        container.innerHTML = `
+          <div class="history-item">
+            🔍 Transaksi
+            <b>"${kataKunci}"</b>
+            tidak ditemukan.
+          </div>
+        `;
+
+      } else {
+
+        container.innerHTML =
+          "Belum ada transaksi.";
+
+      }
+
+    }
+
   } catch (error) {
 
     console.error(error);
 
     container.innerHTML =
-      "❌ Gagal memuat riwayat transaksi.<br><br>" +
-      error.message;
+      "❌ Gagal memuat riwayat transaksi.";
 
   }
 
