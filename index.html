@@ -243,6 +243,100 @@ footer {
 .btn-cetak {
   background: #1565c0 !important;
 }
+
+  .nota {
+  max-width: 380px;
+  margin: 15px auto;
+  padding: 20px;
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 3px 12px rgba(0,0,0,.15);
+  font-family: monospace;
+  color: #222;
+}
+
+.nota-header {
+  text-align: center;
+}
+
+.nota-logo {
+  font-size: 30px;
+}
+
+.nota-title {
+  font-size: 23px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.nota-subtitle {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.nota-alamat {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.nota-garis {
+  border-top: 1px dashed #555;
+  margin: 12px 0;
+}
+
+.nota-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.nota-item {
+  margin-bottom: 9px;
+}
+
+.nota-nama {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.nota-detail {
+  font-size: 12px;
+  padding-left: 5px;
+}
+
+.nota-detail span {
+  float: right;
+}
+
+.nota-total {
+  font-size: 13px;
+  line-height: 2;
+}
+
+.nota-total div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nota-total span {
+  font-weight: bold;
+}
+
+.nota-kembalian {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.nota-terima {
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.btn-cetak {
+  background: #1565c0 !important;
+  margin-top: 15px !important;
+}
 </style>
 </head>
 
@@ -1147,21 +1241,37 @@ async function hapusBarang(id) {
   const container =
     document.getElementById("struk");
 
+  const sekarang =
+    new Date().toLocaleString("id-ID");
+
   let daftarBarang = "";
 
   items.forEach(item => {
 
-    const subtotal =
-      Number(item.harga || 0) *
+    const harga =
+      Number(item.harga || 0);
+
+    const qty =
       Number(item.qty || 0);
 
+    const subtotal =
+      harga * qty;
+
     daftarBarang += `
-      <div>
-        ${item.nama || "-"}
-        × ${item.qty}
-        <span style="float:right">
-          Rp ${formatRupiah(subtotal)}
-        </span>
+      <div class="nota-item">
+
+        <div class="nota-nama">
+          ${item.nama || "-"}
+        </div>
+
+        <div class="nota-detail">
+          ${qty} x Rp ${formatRupiah(harga)}
+
+          <span>
+            Rp ${formatRupiah(subtotal)}
+          </span>
+        </div>
+
       </div>
     `;
 
@@ -1171,50 +1281,83 @@ async function hapusBarang(id) {
 
   container.innerHTML = `
 
-    <div class="struk">
+    <div class="nota">
 
-      <div class="struk-header">
-        WARUNG PAHALA
+      <div class="nota-header">
+
+        <div class="nota-logo">
+          🕌
+        </div>
+
+        <div class="nota-title">
+          WARUNG PAHALA
+        </div>
+
+        <div class="nota-subtitle">
+          Masjid Miftahul Jannah
+        </div>
+
+        <div class="nota-alamat">
+          NOTA PEMBAYARAN
+        </div>
+
       </div>
 
-      <div class="struk-center">
-        Masjid Miftahul Jannah
+      <div class="nota-garis"></div>
+
+      <div class="nota-info">
+
+        <span>Tanggal</span>
+        <span>${sekarang}</span>
+
       </div>
 
-      <div class="struk-line"></div>
+      <div class="nota-garis"></div>
 
-      ${daftarBarang}
+      <div class="nota-barang">
 
-      <div class="struk-line"></div>
+        ${daftarBarang}
 
-      <b>
-        TOTAL
-        <span style="float:right">
-          Rp ${formatRupiah(total)}
-        </span>
-      </b>
+      </div>
 
-      <br>
+      <div class="nota-garis"></div>
 
-      Uang Pembeli
-      <span style="float:right">
-        Rp ${formatRupiah(uangBayar)}
-      </span>
+      <div class="nota-total">
 
-      <br>
+        <div>
+          TOTAL
+          <span>
+            Rp ${formatRupiah(total)}
+          </span>
+        </div>
 
-      <b>
-        Kembalian
-        <span style="float:right">
-          Rp ${formatRupiah(kembalian)}
-        </span>
-      </b>
+        <div>
+          UANG BAYAR
+          <span>
+            Rp ${formatRupiah(uangBayar)}
+          </span>
+        </div>
 
-      <div class="struk-line"></div>
+        <div class="nota-kembalian">
+          KEMBALIAN
+          <span>
+            Rp ${formatRupiah(kembalian)}
+          </span>
+        </div>
 
-      <div class="struk-center">
-        Terima kasih 🙏<br>
+      </div>
+
+      <div class="nota-garis"></div>
+
+      <div class="nota-terima">
+
+        TERIMA KASIH 🙏<br>
+        Atas pembelian Anda
+
+        <br><br>
+
         Semoga berkah
+
       </div>
 
       <button
