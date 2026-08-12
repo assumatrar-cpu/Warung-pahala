@@ -651,6 +651,9 @@ footer {
   <button onclick="showPage('laporanPage'); tampilkanLaporanHariIni()">
     📊 Laporan
   </button>
+  <button onclick="showPage('laporanBulananPage'); tampilkanLaporanBulanan()">
+  📅 Bulanan
+  </button>
 </nav>
 
 <div class="container">
@@ -690,6 +693,44 @@ footer {
     <button class="btn checkout" onclick="bayar()">
       💰 BAYAR & SIMPAN TRANSAKSI
     </button>
+  </div>
+
+</section>
+
+  <!-- LAPORAN BULANAN -->
+<section id="laporanBulananPage" class="hidden">
+
+  <div class="card">
+
+    <h2>📅 Laporan Penjualan Bulanan</h2>
+
+    <p id="bulanLaporan"></p>
+
+    <div class="laporan-box">
+
+      <div class="laporan-item">
+        <div>💰 Omzet Bulan Ini</div>
+        <strong id="omzetBulanIni">Rp 0</strong>
+      </div>
+
+      <div class="laporan-item">
+        <div>🧾 Transaksi</div>
+        <strong id="jumlahTransaksiBulanIni">0</strong>
+      </div>
+
+      <div class="laporan-item">
+        <div>📦 Barang Terjual</div>
+        <strong id="barangTerjualBulanIni">0</strong>
+      </div>
+
+    </div>
+
+    <button
+      class="btn"
+      onclick="tampilkanLaporanBulanan()">
+      🔄 Refresh Laporan
+    </button>
+
   </div>
 
 </section>
@@ -1384,26 +1425,38 @@ function tampilkanDataBarang() {
 
   }
 
-  async function tampilkanLaporanHariIni() {
+  async function tampilkanLaporanBulanan() {
 
   try {
 
-    const awalHari = new Date();
-    awalHari.setHours(0, 0, 0, 0);
+    const sekarang = new Date();
 
-    const akhirHari = new Date();
-    akhirHari.setHours(23, 59, 59, 999);
+    // Awal bulan
+    const awalBulan = new Date(
+      sekarang.getFullYear(),
+      sekarang.getMonth(),
+      1,
+      0, 0, 0, 0
+    );
+
+    // Awal bulan berikutnya
+    const awalBulanBerikutnya = new Date(
+      sekarang.getFullYear(),
+      sekarang.getMonth() + 1,
+      1,
+      0, 0, 0, 0
+    );
 
     const snapshot = await db.collection("transaksi")
       .where(
         "waktu",
         ">=",
-        firebase.firestore.Timestamp.fromDate(awalHari)
+        firebase.firestore.Timestamp.fromDate(awalBulan)
       )
       .where(
         "waktu",
-        "<=",
-        firebase.firestore.Timestamp.fromDate(akhirHari)
+        "<",
+        firebase.firestore.Timestamp.fromDate(awalBulanBerikutnya)
       )
       .get();
 
@@ -1431,20 +1484,18 @@ function tampilkanDataBarang() {
 
     });
 
-    document.getElementById("omzetHariIni").innerText =
+    document.getElementById("omzetBulanIni").innerText =
       "Rp " + formatRupiah(omzet);
 
-    document.getElementById("jumlahTransaksiHariIni").innerText =
+    document.getElementById("jumlahTransaksiBulanIni").innerText =
       jumlahTransaksi;
 
-    document.getElementById("barangTerjualHariIni").innerText =
+    document.getElementById("barangTerjualBulanIni").innerText =
       barangTerjual;
 
-    document.getElementById("tanggalLaporan").innerText =
-      "Tanggal: " +
-      new Date().toLocaleDateString("id-ID", {
-        weekday: "long",
-        day: "numeric",
+    document.getElementById("bulanLaporan").innerText =
+      "Periode: " +
+      sekarang.toLocaleDateString("id-ID", {
         month: "long",
         year: "numeric"
       });
@@ -1454,7 +1505,7 @@ function tampilkanDataBarang() {
     console.error(error);
 
     alert(
-      "Gagal memuat laporan:\n" +
+      "Gagal memuat laporan bulanan:\n" +
       error.message
     );
 
