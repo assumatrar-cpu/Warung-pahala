@@ -705,28 +705,53 @@ function tampilkanDataBarang() {
 
   container.innerHTML = "";
 
+  if (barang.length === 0) {
+    container.innerHTML = "Belum ada barang.";
+    return;
+  }
+
   barang.forEach(b => {
+
+    const nama = b.nama || "-";
+    const harga = Number(b.harga || 0);
+    const stok = Number(b.stok || 0);
 
     container.innerHTML += `
 
       <div class="history-item">
 
-        <b>${b.nama}</b><br>
+        <b>${nama}</b><br>
 
         Harga:
-        Rp ${formatRupiah(Number(b.harga || 0))}
+        Rp ${formatRupiah(harga)}
 
         <br>
 
         Stok:
-        ${Number(b.stok || 0)}
+        ${stok}
+
+        <br><br>
+
+        <button
+          class="btn"
+          onclick="editBarang('${b.id}')"
+        >
+          ✏️ Edit
+        </button>
+
+        <button
+          class="btn"
+          onclick="hapusBarang('${b.id}')"
+          style="background:#c62828;"
+        >
+          🗑️ Hapus
+        </button>
 
       </div>
 
     `;
 
   });
-
 }
 
 
@@ -881,6 +906,116 @@ function formatRupiah(angka) {
     alert("Gagal menambahkan barang: " + error.message);
   }
   }
+
+  async function editBarang(id) {
+
+  const b = barang.find(x => x.id === id);
+
+  if (!b) {
+    alert("Barang tidak ditemukan.");
+    return;
+  }
+
+  const namaBaru = prompt(
+    "Nama barang:",
+    b.nama || ""
+  );
+
+  if (namaBaru === null) return;
+
+  const hargaBaru = prompt(
+    "Harga:",
+    b.harga || 0
+  );
+
+  if (hargaBaru === null) return;
+
+  const stokBaru = prompt(
+    "Stok:",
+    b.stok || 0
+  );
+
+  if (stokBaru === null) return;
+
+  const harga = Number(hargaBaru);
+  const stok = Number(stokBaru);
+
+  if (!namaBaru.trim()) {
+    alert("Nama barang tidak boleh kosong.");
+    return;
+  }
+
+  if (isNaN(harga) || harga < 0) {
+    alert("Harga tidak valid.");
+    return;
+  }
+
+  if (isNaN(stok) || stok < 0) {
+    alert("Stok tidak valid.");
+    return;
+  }
+
+  try {
+
+    await db.collection("barang")
+      .doc(id)
+      .update({
+        nama: namaBaru.trim(),
+        harga: harga,
+        stok: stok
+      });
+
+    alert("✅ Barang berhasil diperbarui.");
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Gagal mengubah barang: " +
+      error.message
+    );
+
+  }
+}
+
+
+async function hapusBarang(id) {
+
+  const b = barang.find(x => x.id === id);
+
+  if (!b) {
+    alert("Barang tidak ditemukan.");
+    return;
+  }
+
+  const yakin = confirm(
+    "Hapus barang " +
+    b.nama +
+    "?"
+  );
+
+  if (!yakin) return;
+
+  try {
+
+    await db.collection("barang")
+      .doc(id)
+      .delete();
+
+    alert("✅ Barang berhasil dihapus.");
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Gagal menghapus barang: " +
+      error.message
+    );
+
+  }
+}
 
 
 /* ==============================
