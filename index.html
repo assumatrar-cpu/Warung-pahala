@@ -1577,85 +1577,61 @@ async function tampilkanRiwayat() {
 
   const container = document.getElementById("history");
 
-  container.innerHTML = "Memuat transaksi...";
+  if (!container) {
+    console.error("Elemen history tidak ditemukan!");
+    return;
+  }
+
+  container.innerHTML = "⏳ Memuat transaksi...";
 
   try {
 
-    const snapshot = await db.collection("transaksi")
+    const snapshot = await db
+      .collection("transaksi")
       .orderBy("waktu", "desc")
-      .limit(100)
+      .limit(50)
       .get();
-
-    const searchInput =
-      document.getElementById("searchTransaksi");
-
-    const kataCari =
-      searchInput
-        ? searchInput.value.trim().toLowerCase()
-        : "";
 
     container.innerHTML = "";
 
-    let jumlahDitemukan = 0;
+    if (snapshot.empty) {
+
+      container.innerHTML =
+        "<p>📭 Belum ada transaksi.</p>";
+
+      return;
+    }
 
     snapshot.forEach(doc => {
 
       const data = doc.data();
 
-      /* =========================
-         NOMOR TRANSAKSI
-      ========================= */
-
-      const nomor =
-        String(data.nomorTransaksi || "").toLowerCase();
-
-
-      /* =========================
-         TANGGAL
-      ========================= */
-
       let tanggal = "-";
 
       if (data.waktu) {
 
-        tanggal =
-          data.waktu
+        try {
+
+          tanggal = data.waktu
             .toDate()
             .toLocaleString("id-ID");
 
-      }
+        } catch (e) {
 
-      const tanggalCari =
-        tanggal.toLowerCase();
+          tanggal = "-";
 
-
-      /* =========================
-         CEK PENCARIAN
-      ========================= */
-
-      if (
-        kataCari !== "" &&
-        !nomor.includes(kataCari) &&
-        !tanggalCari.includes(kataCari)
-      ) {
-
-        return;
+        }
 
       }
-
-
-      jumlahDitemukan++;
-
-
-      /* =========================
-         DAFTAR BARANG
-      ========================= */
 
       let daftarBarang = "";
 
       if (Array.isArray(data.items)) {
 
         data.items.forEach(item => {
+
+          const nama =
+            item.nama || "-";
 
           const qty =
             Number(item.qty || 0);
@@ -1667,11 +1643,10 @@ async function tampilkanRiwayat() {
             harga * qty;
 
           daftarBarang += `
-
             <div class="riwayat-barang-item">
 
               <span>
-                ${item.nama || "-"} × ${qty}
+                ${nama} × ${qty}
               </span>
 
               <span>
@@ -1679,17 +1654,11 @@ async function tampilkanRiwayat() {
               </span>
 
             </div>
-
           `;
 
         });
 
       }
-
-
-      /* =========================
-         TAMPILKAN TRANSAKSI
-      ========================= */
 
       container.innerHTML += `
 
@@ -1707,18 +1676,15 @@ async function tampilkanRiwayat() {
 
           </div>
 
-
-          <div class="riwayat-label">
-            🛍️ Barang
-          </div>
-
-
           <div class="riwayat-barang">
+
+            <div class="history-label">
+              🛍️ Barang
+            </div>
 
             ${daftarBarang}
 
           </div>
-
 
           <div class="riwayat-total">
 
@@ -1732,36 +1698,25 @@ async function tampilkanRiwayat() {
 
           </div>
 
-
           <div class="riwayat-pembayaran">
 
-            <div>
-              💵 Tunai:
-              <b>
-                Rp ${formatRupiah(
-                  Number(data.uangBayar || 0)
-                )}
-              </b>
-            </div>
+            💵 Tunai:
+            <b>
+              Rp ${formatRupiah(
+                Number(data.uangBayar || 0)
+              )}
+            </b>
 
-            <div class="riwayat-kembalian">
+            <br>
 
-              🔄 Kembalian:
+            🔄 Kembalian:
+            <span class="riwayat-kembalian">
               Rp ${formatRupiah(
                 Number(data.kembalian || 0)
               )}
-
-            </div>
+            </span>
 
           </div>
-
-
-          <button
-            class="btn-cetak-riwayat"
-            onclick="cetakRiwayat('${doc.id}')"
-          >
-            🖨️ Cetak Struk
-          </button>
 
         </div>
 
@@ -1769,41 +1724,21 @@ async function tampilkanRiwayat() {
 
     });
 
-
-    /* =========================
-       JIKA TIDAK ADA HASIL
-    ========================= */
-
-    if (jumlahDitemukan === 0) {
-
-      if (kataCari !== "") {
-
-        container.innerHTML = `
-          <div class="history-item">
-            🔍 Transaksi
-            <b>"${kataCari}"</b>
-            tidak ditemukan.
-          </div>
-        `;
-
-      } else {
-
-        container.innerHTML =
-          "Belum ada transaksi.";
-
-      }
-
-    }
-
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Gagal mengambil riwayat:",
+      error
+    );
 
     container.innerHTML = `
-      <div class="history-item">
-        ❌ Gagal memuat riwayat:<br>
+      <p style="color:#c62828;">
+        ❌ Gagal memuat riwayat transaksi.
+      </p>
+
+      <small>
         ${error.message}
-      </div>
+      </small>
     `;
 
   }
