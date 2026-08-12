@@ -214,6 +214,35 @@ footer {
   color: white;
   margin-top: 30px;
 }
+
+  /* STRUK PEMBAYARAN */
+.struk {
+  background: white;
+  border: 1px dashed #555;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 15px;
+  font-family: monospace;
+}
+
+.struk-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.struk-center {
+  text-align: center;
+}
+
+.struk-line {
+  border-top: 1px dashed #555;
+  margin: 10px 0;
+}
+
+.btn-cetak {
+  background: #1565c0 !important;
+}
 </style>
 </head>
 
@@ -260,6 +289,8 @@ footer {
     <div id="cart">
       Keranjang masih kosong.
     </div>
+
+    <div id="struk" class="hidden"></div>
 
     <div id="total" class="total">
       Total: Rp 0
@@ -714,6 +745,13 @@ async function bayar() {
     );
 
     // Kosongkan keranjang
+    tampilkanStruk(
+  keranjang,
+  total,
+  uangBayar,
+  kembalian
+);
+    
     keranjang = [];
 
     tampilkanKeranjang();
@@ -1103,6 +1141,152 @@ async function hapusBarang(id) {
 
   }
 }
+
+  function tampilkanStruk(items, total, uangBayar, kembalian) {
+
+  const container =
+    document.getElementById("struk");
+
+  let daftarBarang = "";
+
+  items.forEach(item => {
+
+    const subtotal =
+      Number(item.harga || 0) *
+      Number(item.qty || 0);
+
+    daftarBarang += `
+      <div>
+        ${item.nama || "-"}
+        × ${item.qty}
+        <span style="float:right">
+          Rp ${formatRupiah(subtotal)}
+        </span>
+      </div>
+    `;
+
+  });
+
+  container.classList.remove("hidden");
+
+  container.innerHTML = `
+
+    <div class="struk">
+
+      <div class="struk-header">
+        WARUNG PAHALA
+      </div>
+
+      <div class="struk-center">
+        Masjid Miftahul Jannah
+      </div>
+
+      <div class="struk-line"></div>
+
+      ${daftarBarang}
+
+      <div class="struk-line"></div>
+
+      <b>
+        TOTAL
+        <span style="float:right">
+          Rp ${formatRupiah(total)}
+        </span>
+      </b>
+
+      <br>
+
+      Uang Pembeli
+      <span style="float:right">
+        Rp ${formatRupiah(uangBayar)}
+      </span>
+
+      <br>
+
+      <b>
+        Kembalian
+        <span style="float:right">
+          Rp ${formatRupiah(kembalian)}
+        </span>
+      </b>
+
+      <div class="struk-line"></div>
+
+      <div class="struk-center">
+        Terima kasih 🙏<br>
+        Semoga berkah
+      </div>
+
+      <button
+        class="btn btn-cetak"
+        onclick="cetakStruk()"
+      >
+        🖨️ CETAK / SIMPAN STRUK
+      </button>
+
+    </div>
+
+  `;
+  }
+
+  function cetakStruk() {
+
+  const isi =
+    document.getElementById("struk").innerHTML;
+
+  const jendela =
+    window.open("", "_blank");
+
+  jendela.document.write(`
+    <html>
+    <head>
+      <title>Struk Warung Pahala</title>
+
+      <style>
+        body {
+          font-family: monospace;
+          padding: 15px;
+        }
+
+        .struk {
+          max-width: 350px;
+          margin: auto;
+        }
+
+        .struk-header {
+          text-align: center;
+          font-weight: bold;
+          font-size: 20px;
+        }
+
+        .struk-center {
+          text-align: center;
+        }
+
+        .struk-line {
+          border-top: 1px dashed #555;
+          margin: 10px 0;
+        }
+
+        button {
+          display: none;
+        }
+      </style>
+    </head>
+
+    <body>
+      ${isi}
+    </body>
+
+    </html>
+  `);
+
+  jendela.document.close();
+
+  jendela.focus();
+
+  jendela.print();
+  }
 
 
 /* ==============================
