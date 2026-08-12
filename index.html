@@ -337,6 +337,113 @@ footer {
   background: #1565c0 !important;
   margin-top: 15px !important;
 }
+
+  /* =========================
+   CETAK NOTA THERMAL
+========================= */
+
+@media print {
+
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: #000 !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #struk,
+  #struk * {
+    visibility: visible;
+  }
+
+  #struk {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 58mm;
+    margin: 0;
+    padding: 3mm;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    color: #000;
+  }
+
+  .nota {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .nota-title {
+    font-size: 17px !important;
+    font-weight: bold;
+  }
+
+  .nota-subtitle {
+    font-size: 11px !important;
+  }
+
+  .nota-alamat {
+    font-size: 9px !important;
+  }
+
+  .nota-info {
+    font-size: 9px !important;
+  }
+
+  .nota-item {
+    font-size: 10px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .nota-nama {
+    font-size: 10px !important;
+  }
+
+  .nota-detail {
+    font-size: 9px !important;
+  }
+
+  .nota-total {
+    font-size: 10px !important;
+    line-height: 1.7 !important;
+  }
+
+  .nota-kembalian {
+    font-size: 12px !important;
+    font-weight: bold;
+  }
+
+  .nota-terima {
+    font-size: 9px !important;
+  }
+
+  .btn-cetak {
+    display: none !important;
+  }
+
+  .struk-line,
+  .nota-garis {
+    border-top: 1px dashed #000 !important;
+    margin: 6px 0 !important;
+  }
+}
 </style>
 </head>
 
