@@ -792,22 +792,31 @@ footer {
 <section id="riwayat">
 
   <div class="card">
+
     <h2>📋 Riwayat Transaksi</h2>
 
     <!-- PENCARIAN TRANSAKSI -->
     <div class="riwayat-search">
+
       <input
         type="text"
         id="searchTransaksi"
         placeholder="🔍 Cari nomor transaksi atau tanggal..."
         oninput="tampilkanRiwayat()"
       >
+
     </div>
 
+    <!-- HASIL RIWAYAT -->
+    <div id="history">
+      Memuat transaksi...
+    </div>
+
+    <!-- REFRESH -->
     <button
       class="btn"
-      onclick="tampilkanLaporanBulanan()">
-      🔄 Refresh Laporan
+      onclick="tampilkanRiwayat()">
+      🔄 Refresh Riwayat
     </button>
 
   </div>
