@@ -648,6 +648,9 @@ footer {
   <button onclick="showPage('kasir')">🛒 Kasir</button>
   <button onclick="showPage('barangPage')">📦 Barang</button>
   <button onclick="showPage('riwayat')">📋 Riwayat</button>
+  <button onclick="showPage('laporanPage'); tampilkanLaporanHariIni()">
+    📊 Laporan
+  </button>
 </nav>
 
 <div class="container">
@@ -751,6 +754,44 @@ footer {
         oninput="tampilkanRiwayat()"
       >
     </div>
+
+    <!-- LAPORAN PENJUALAN -->
+<section id="laporanPage" class="hidden">
+
+  <div class="card">
+
+    <h2>📊 Laporan Penjualan Hari Ini</h2>
+
+    <p id="tanggalLaporan"></p>
+
+    <div class="laporan-box">
+
+      <div class="laporan-item">
+        <div>💰 Omzet</div>
+        <strong id="omzetHariIni">Rp 0</strong>
+      </div>
+
+      <div class="laporan-item">
+        <div>🧾 Transaksi</div>
+        <strong id="jumlahTransaksiHariIni">0</strong>
+      </div>
+
+      <div class="laporan-item">
+        <div>📦 Barang Terjual</div>
+        <strong id="barangTerjualHariIni">0</strong>
+      </div>
+
+    </div>
+
+    <button
+      class="btn"
+      onclick="tampilkanLaporanHariIni()">
+      🔄 Refresh Laporan
+    </button>
+
+  </div>
+
+</section>
 
     <!-- DAFTAR TRANSAKSI -->
     <div id="history">
@@ -1336,6 +1377,84 @@ function tampilkanDataBarang() {
 
     alert(
       "Gagal memuat laporan: " +
+      error.message
+    );
+
+  }
+
+  }
+
+  async function tampilkanLaporanHariIni() {
+
+  try {
+
+    const awalHari = new Date();
+    awalHari.setHours(0, 0, 0, 0);
+
+    const akhirHari = new Date();
+    akhirHari.setHours(23, 59, 59, 999);
+
+    const snapshot = await db.collection("transaksi")
+      .where(
+        "waktu",
+        ">=",
+        firebase.firestore.Timestamp.fromDate(awalHari)
+      )
+      .where(
+        "waktu",
+        "<=",
+        firebase.firestore.Timestamp.fromDate(akhirHari)
+      )
+      .get();
+
+    let omzet = 0;
+    let jumlahTransaksi = 0;
+    let barangTerjual = 0;
+
+    snapshot.forEach(doc => {
+
+      const data = doc.data();
+
+      jumlahTransaksi++;
+
+      omzet += Number(data.total || 0);
+
+      if (Array.isArray(data.items)) {
+
+        data.items.forEach(item => {
+
+          barangTerjual += Number(item.qty || 0);
+
+        });
+
+      }
+
+    });
+
+    document.getElementById("omzetHariIni").innerText =
+      "Rp " + formatRupiah(omzet);
+
+    document.getElementById("jumlahTransaksiHariIni").innerText =
+      jumlahTransaksi;
+
+    document.getElementById("barangTerjualHariIni").innerText =
+      barangTerjual;
+
+    document.getElementById("tanggalLaporan").innerText =
+      "Tanggal: " +
+      new Date().toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Gagal memuat laporan:\n" +
       error.message
     );
 
