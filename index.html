@@ -606,44 +606,79 @@ function kurang(index) {
 async function bayar() {
 
   if (keranjang.length === 0) {
-
     alert("Keranjang masih kosong!");
+    return;
+  }
+
+  // Hitung total
+  let total = 0;
+
+  keranjang.forEach(item => {
+    total += item.harga * item.qty;
+  });
+
+  // Tampilkan total kepada kasir
+  const uangInput = prompt(
+    "TOTAL BELANJA\n\nRp " +
+    formatRupiah(total) +
+    "\n\nMasukkan uang pembeli:"
+  );
+
+  // Jika tekan Cancel
+  if (uangInput === null) {
+    return;
+  }
+
+  const uangBayar = Number(
+    String(uangInput).replace(/\./g, "").replace(/,/g, "")
+  );
+
+  // Validasi uang
+  if (isNaN(uangBayar) || uangBayar < 0) {
+    alert("Jumlah uang tidak valid!");
+    return;
+  }
+
+  // Uang kurang
+  if (uangBayar < total) {
+
+    alert(
+      "Uang pembeli kurang!\n\n" +
+      "Total: Rp " + formatRupiah(total) + "\n" +
+      "Uang: Rp " + formatRupiah(uangBayar) + "\n" +
+      "Kurang: Rp " +
+      formatRupiah(total - uangBayar)
+    );
 
     return;
   }
 
-  let total = 0;
-
-  keranjang.forEach(item => {
-
-    total +=
-      item.harga * item.qty;
-
-  });
-
+  // Hitung kembalian
+  const kembalian = uangBayar - total;
 
   try {
 
-    /* SIMPAN TRANSAKSI */
-
+    // Simpan transaksi
     await db.collection("transaksi").add({
 
-      waktu: firebase.firestore.FieldValue.serverTimestamp(),
+      waktu:
+        firebase.firestore.FieldValue.serverTimestamp(),
 
       items: keranjang,
 
-      total: total
+      total: total,
+
+      uangBayar: uangBayar,
+
+      kembalian: kembalian
 
     });
 
-
-    /* KURANGI STOK */
-
+    // Kurangi stok
     for (const item of keranjang) {
 
       const ref =
-        db.collection("barang")
-          .doc(item.id);
+        db.collection("barang").doc(item.id);
 
       await db.runTransaction(async transaction => {
 
@@ -659,24 +694,31 @@ async function bayar() {
           stokLama - item.qty;
 
         transaction.update(ref, {
-
           stok: Math.max(0, stokBaru)
-
         });
 
       });
-
     }
 
-
+    // Tampilkan hasil pembayaran
     alert(
-      "Transaksi berhasil!\n\nTotal: Rp " +
-      formatRupiah(total)
+      "✅ PEMBAYARAN BERHASIL!\n\n" +
+      "Total: Rp " +
+      formatRupiah(total) +
+      "\n\n" +
+      "Uang pembeli: Rp " +
+      formatRupiah(uangBayar) +
+      "\n\n" +
+      "Kembalian: Rp " +
+      formatRupiah(kembalian)
     );
 
+    // Kosongkan keranjang
     keranjang = [];
 
     tampilkanKeranjang();
+
+    tampilkanBarang();
 
     tampilkanRiwayat();
 
@@ -685,7 +727,7 @@ async function bayar() {
     console.error(error);
 
     alert(
-      "Transaksi gagal: " +
+      "❌ Transaksi gagal:\n" +
       error.message
     );
 
