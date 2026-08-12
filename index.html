@@ -783,8 +783,40 @@ async function bayar() {
 
   try {
 
+    // Buat nomor transaksi otomatis
+    const counterRef =
+      db.collection("pengaturan").doc("counter");
+
+    const nomorTransaksi =
+      await db.runTransaction(async transaction => {
+
+        const counterDoc =
+          await transaction.get(counterRef);
+
+        let nomor = 1;
+
+        if (counterDoc.exists) {
+          nomor =
+            Number(counterDoc.data().nomor || 0) + 1;
+        }
+
+        transaction.set(
+          counterRef,
+          { nomor: nomor },
+          { merge: true }
+        );
+
+        return nomor;
+      });
+
+    const kodeTransaksi =
+      "WP-" +
+      String(nomorTransaksi).padStart(5, "0");
+
     // Simpan transaksi
     await db.collection("transaksi").add({
+
+      nomorTransaksi: kodeTransaksi,
 
       waktu:
         firebase.firestore.FieldValue.serverTimestamp(),
@@ -843,7 +875,8 @@ async function bayar() {
   keranjang,
   total,
   uangBayar,
-  kembalian
+  kembalian,
+  kodeTransaksi
 );
     
     keranjang = [];
@@ -1236,7 +1269,13 @@ async function hapusBarang(id) {
   }
 }
 
-  function tampilkanStruk(items, total, uangBayar, kembalian) {
+  function tampilkanStruk(
+  items,
+  total,
+  uangBayar,
+  kembalian,
+  kodeTransaksi
+) {
 
   const container =
     document.getElementById("struk");
