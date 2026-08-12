@@ -1204,13 +1204,14 @@ async function tampilkanRiwayat() {
       let tanggal = "-";
 
       if (data.waktu) {
-
         tanggal =
           data.waktu
             .toDate()
             .toLocaleString("id-ID");
-
       }
+
+      let nomor =
+        data.nomorTransaksi || "-";
 
       let daftarBarang = "";
 
@@ -1238,7 +1239,9 @@ async function tampilkanRiwayat() {
 
         <div class="history-item">
 
-          <b>🕐 ${tanggal}</b>
+          <b>🧾 ${nomor}</b><br>
+
+          🕐 ${tanggal}
 
           <hr>
 
