@@ -1797,61 +1797,146 @@ async function hapusBarang(id) {
 
   function cetakStruk() {
 
-  const isi =
-    document.getElementById("struk").innerHTML;
+  const struk = document.getElementById("struk");
 
-  const jendela =
-    window.open("", "_blank");
+  if (!struk || !struk.innerHTML.trim()) {
+    alert("Struk belum tersedia.");
+    return;
+  }
+
+  const jendela = window.open("", "_blank");
+
+  if (!jendela) {
+    alert("Popup diblokir browser. Izinkan popup untuk mencetak struk.");
+    return;
+  }
 
   jendela.document.write(`
-    <html>
-    <head>
-      <title>Struk Warung Pahala</title>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
 
-      <style>
-        body {
-          font-family: monospace;
-          padding: 15px;
-        }
+<title>Struk Warung Pahala</title>
 
-        .struk {
-          max-width: 350px;
-          margin: auto;
-        }
+<style>
 
-        .struk-header {
-          text-align: center;
-          font-weight: bold;
-          font-size: 20px;
-        }
+@page {
+  size: 58mm auto;
+  margin: 0;
+}
 
-        .struk-center {
-          text-align: center;
-        }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 58mm;
+  background: white;
+}
 
-        .struk-line {
-          border-top: 1px dashed #555;
-          margin: 10px 0;
-        }
+body {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  color: #000;
+}
 
-        button {
-          display: none;
-        }
-      </style>
-    </head>
+.nota {
+  width: 52mm;
+  margin: auto;
+  padding: 3mm 0;
+}
 
-    <body>
-      ${isi}
-    </body>
+.nota-header {
+  text-align: center;
+}
 
-    </html>
+.nota-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.nota-subtitle {
+  font-size: 11px;
+}
+
+.nota-alamat {
+  font-size: 9px;
+}
+
+.nota-garis {
+  border-top: 1px dashed #000;
+  margin: 6px 0;
+}
+
+.nota-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+}
+
+.nota-item {
+  margin-bottom: 5px;
+}
+
+.nota-nama {
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.nota-detail {
+  font-size: 9px;
+  padding-left: 4px;
+}
+
+.nota-detail span {
+  float: right;
+}
+
+.nota-total {
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.nota-total div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nota-kembalian {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.nota-terima {
+  text-align: center;
+  font-size: 9px;
+  margin-top: 8px;
+}
+
+.btn-cetak {
+  display: none !important;
+}
+
+</style>
+</head>
+
+<body>
+
+${struk.innerHTML}
+
+<script>
+window.onload = function() {
+  setTimeout(function() {
+    window.print();
+  }, 500);
+};
+<\/script>
+
+</body>
+</html>
   `);
 
   jendela.document.close();
 
-  jendela.focus();
-
-  jendela.print();
   }
 
 
