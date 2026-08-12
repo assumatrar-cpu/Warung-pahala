@@ -825,7 +825,6 @@ async function tampilkanRiwayat() {
         "Belum ada transaksi.";
 
       return;
-
     }
 
     snapshot.forEach(doc => {
@@ -843,16 +842,62 @@ async function tampilkanRiwayat() {
 
       }
 
+      let daftarBarang = "";
+
+      if (Array.isArray(data.items)) {
+
+        data.items.forEach(item => {
+
+          const subtotal =
+            Number(item.harga || 0) *
+            Number(item.qty || 0);
+
+          daftarBarang += `
+            <div>
+              ${item.nama || "-"}
+              × ${item.qty || 0}
+              = Rp ${formatRupiah(subtotal)}
+            </div>
+          `;
+
+        });
+
+      }
+
       container.innerHTML += `
 
         <div class="history-item">
 
-          <b>${tanggal}</b><br>
+          <b>🕐 ${tanggal}</b>
 
-          Total:
+          <hr>
+
+          <b>🛍️ Barang:</b>
+
+          ${daftarBarang}
+
+          <br>
+
           <b>
-            Rp ${formatRupiah(Number(data.total || 0))}
+            💰 Total:
+            Rp ${formatRupiah(
+              Number(data.total || 0)
+            )}
           </b>
+
+          <br>
+
+          💵 Uang pembeli:
+          Rp ${formatRupiah(
+            Number(data.uangBayar || 0)
+          )}
+
+          <br>
+
+          🔄 Kembalian:
+          Rp ${formatRupiah(
+            Number(data.kembalian || 0)
+          )}
 
         </div>
 
