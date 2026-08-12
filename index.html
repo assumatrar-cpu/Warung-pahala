@@ -207,6 +207,35 @@ input {
   display: none;
 }
 
+  .laporan-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.laporan-item {
+  background: #006b45;
+  color: white;
+  padding: 15px 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.laporan-item div {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.laporan-item strong {
+  font-size: 18px;
+}
+
+@media (max-width: 600px) {
+  .laporan-box {
+    grid-template-columns: 1fr;
+  }
+}
+
 footer {
   text-align: center;
   padding: 20px;
@@ -1073,6 +1102,75 @@ function tampilkanDataBarang() {
    RIWAYAT TRANSAKSI
    ============================== */
 
+  async function tampilkanLaporanHariIni() {
+
+  try {
+
+    const awalHari = new Date();
+    awalHari.setHours(0, 0, 0, 0);
+
+    const akhirHari = new Date();
+    akhirHari.setHours(23, 59, 59, 999);
+
+    const snapshot = await db.collection("transaksi")
+      .where(
+        "waktu",
+        ">=",
+        firebase.firestore.Timestamp.fromDate(awalHari)
+      )
+      .where(
+        "waktu",
+        "<=",
+        firebase.firestore.Timestamp.fromDate(akhirHari)
+      )
+      .get();
+
+    let omzet = 0;
+    let jumlahTransaksi = 0;
+    let barangTerjual = 0;
+
+    snapshot.forEach(doc => {
+
+      const data = doc.data();
+
+      jumlahTransaksi++;
+
+      omzet += Number(data.total || 0);
+
+      if (Array.isArray(data.items)) {
+
+        data.items.forEach(item => {
+
+          barangTerjual += Number(item.qty || 0);
+
+        });
+
+      }
+
+    });
+
+    document.getElementById("omzetHariIni").innerText =
+      "Rp " + formatRupiah(omzet);
+
+    document.getElementById("jumlahTransaksiHariIni").innerText =
+      jumlahTransaksi;
+
+    document.getElementById("barangTerjualHariIni").innerText =
+      barangTerjual;
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Gagal memuat laporan: " +
+      error.message
+    );
+
+  }
+
+  }
+
 async function tampilkanRiwayat() {
 
   const container =
@@ -1209,7 +1307,9 @@ function showPage(page) {
 
   if (page === "riwayat") {
 
-    tampilkanRiwayat();
+  tampilkanRiwayat();
+
+  tampilkanLaporanHariIni();
 
   }
 
