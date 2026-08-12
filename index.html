@@ -277,6 +277,32 @@ footer {
 <section id="barangPage" class="hidden">
 
   <div class="card">
+  <h2>➕ Tambah Barang</h2>
+
+  <input
+    type="text"
+    id="namaBarangBaru"
+    placeholder="Nama barang"
+  >
+
+  <input
+    type="number"
+    id="hargaBarangBaru"
+    placeholder="Harga"
+  >
+
+  <input
+    type="number"
+    id="stokBarangBaru"
+    placeholder="Stok"
+  >
+
+  <button class="btn" onclick="tambahBarang()">
+    💾 Simpan Barang
+  </button>
+  </div>
+
+  <div class="card">
     <h2>📦 Data Barang</h2>
 
     <p>
@@ -816,6 +842,45 @@ function formatRupiah(angka) {
     .toLocaleString("id-ID");
 
 }
+
+  async function tambahBarang() {
+  const nama = document.getElementById("namaBarangBaru").value.trim();
+  const harga = Number(document.getElementById("hargaBarangBaru").value);
+  const stok = Number(document.getElementById("stokBarangBaru").value);
+
+  if (!nama) {
+    alert("Nama barang belum diisi!");
+    return;
+  }
+
+  if (!harga || harga < 0) {
+    alert("Harga belum benar!");
+    return;
+  }
+
+  if (stok < 0 || isNaN(stok)) {
+    alert("Stok belum benar!");
+    return;
+  }
+
+  try {
+    await db.collection("barang").add({
+      nama: nama,
+      harga: harga,
+      stok: stok
+    });
+
+    alert("Barang berhasil ditambahkan!");
+
+    document.getElementById("namaBarangBaru").value = "";
+    document.getElementById("hargaBarangBaru").value = "";
+    document.getElementById("stokBarangBaru").value = "";
+
+  } catch (error) {
+    console.error(error);
+    alert("Gagal menambahkan barang: " + error.message);
+  }
+  }
 
 
 /* ==============================
