@@ -203,6 +203,89 @@ input {
   border-radius: 6px;
 }
 
+  /* RIWAYAT KASIR RAPI */
+
+.history-item {
+  border-left: 5px solid #006b45;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #f8fffa;
+  border-radius: 10px;
+  box-shadow: 0 2px 7px rgba(0,0,0,.08);
+}
+
+.riwayat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.riwayat-nomor {
+  font-weight: bold;
+  color: #006b45;
+  font-size: 17px;
+}
+
+.riwayat-tanggal {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+}
+
+.riwayat-barang {
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.riwayat-barang-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #ddd;
+  font-size: 14px;
+}
+
+.riwayat-barang-item:last-child {
+  border-bottom: none;
+}
+
+.riwayat-total {
+  background: #006b45;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+.riwayat-pembayaran {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.riwayat-kembalian {
+  color: #006b45;
+  font-weight: bold;
+}
+
+.btn-struk-riwayat {
+  width: 100%;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 7px;
+  background: #1565c0;
+  color: white;
+  font-weight: bold;
+}
+
 .hidden {
   display: none;
 }
@@ -1192,7 +1275,7 @@ async function tampilkanRiwayat() {
     if (snapshot.empty) {
 
       container.innerHTML =
-        "Belum ada transaksi.";
+        "<p>Belum ada transaksi.</p>";
 
       return;
     }
@@ -1201,17 +1284,18 @@ async function tampilkanRiwayat() {
 
       const data = doc.data();
 
+      const nomor =
+        data.nomorTransaksi || "-";
+
       let tanggal = "-";
 
       if (data.waktu) {
+
         tanggal =
           data.waktu
             .toDate()
             .toLocaleString("id-ID");
       }
-
-      let nomor =
-        data.nomorTransaksi || "-";
 
       let daftarBarang = "";
 
@@ -1219,58 +1303,96 @@ async function tampilkanRiwayat() {
 
         data.items.forEach(item => {
 
-          const subtotal =
-            Number(item.harga || 0) *
+          const harga =
+            Number(item.harga || 0);
+
+          const qty =
             Number(item.qty || 0);
 
+          const subtotal =
+            harga * qty;
+
           daftarBarang += `
-            <div>
-              ${item.nama || "-"}
-              × ${item.qty || 0}
-              = Rp ${formatRupiah(subtotal)}
+
+            <div class="riwayat-barang-item">
+
+              <div>
+                <b>${item.nama || "-"}</b><br>
+                <small>
+                  ${qty} × Rp ${formatRupiah(harga)}
+                </small>
+              </div>
+
+              <div>
+                <b>
+                  Rp ${formatRupiah(subtotal)}
+                </b>
+              </div>
+
             </div>
+
           `;
 
         });
 
       }
 
+      const total =
+        Number(data.total || 0);
+
+      const uangBayar =
+        Number(data.uangBayar || 0);
+
+      const kembalian =
+        Number(data.kembalian || 0);
+
       container.innerHTML += `
 
         <div class="history-item">
 
-          <b>🧾 ${nomor}</b><br>
+          <div class="riwayat-header">
 
-          🕐 ${tanggal}
+            <div class="riwayat-nomor">
+              🧾 ${nomor}
+            </div>
 
-          <hr>
+            <div class="riwayat-tanggal">
+              🕐 ${tanggal}
+            </div>
 
-          <b>🛍️ Barang:</b>
+          </div>
 
-          ${daftarBarang}
+          <div class="riwayat-barang">
 
-          <br>
+            ${daftarBarang}
 
-          <b>
-            💰 Total:
-            Rp ${formatRupiah(
-              Number(data.total || 0)
-            )}
-          </b>
+          </div>
 
-          <br>
+          <div class="riwayat-total">
 
-          💵 Uang pembeli:
-          Rp ${formatRupiah(
-            Number(data.uangBayar || 0)
-          )}
+            <span>TOTAL</span>
 
-          <br>
+            <span>
+              Rp ${formatRupiah(total)}
+            </span>
 
-          🔄 Kembalian:
-          Rp ${formatRupiah(
-            Number(data.kembalian || 0)
-          )}
+          </div>
+
+          <div class="riwayat-pembayaran">
+
+            💵 Tunai:
+            <b>
+              Rp ${formatRupiah(uangBayar)}
+            </b>
+
+            <br>
+
+            🔄 Kembalian:
+            <span class="riwayat-kembalian">
+              Rp ${formatRupiah(kembalian)}
+            </span>
+
+          </div>
 
         </div>
 
@@ -1283,7 +1405,8 @@ async function tampilkanRiwayat() {
     console.error(error);
 
     container.innerHTML =
-      "Gagal memuat riwayat transaksi.";
+      "❌ Gagal memuat riwayat transaksi.<br><br>" +
+      error.message;
 
   }
 
