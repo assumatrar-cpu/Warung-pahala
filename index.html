@@ -1809,22 +1809,38 @@ async function tampilkanRiwayat() {
 
 function showPage(page) {
 
-  document.getElementById("kasir")
-    .classList.add("hidden");
+  const pages = [
+    "kasir",
+    "barangPage",
+    "riwayat",
+    "laporanBulanan"
+  ];
 
-  document.getElementById("barangPage")
-    .classList.add("hidden");
+  // Sembunyikan semua halaman
+  pages.forEach(id => {
 
-  document.getElementById("riwayat")
-    .classList.add("hidden");
+    const halaman = document.getElementById(id);
 
-  document.getElementById(page)
-    .classList.remove("hidden");
+    if (halaman) {
+      halaman.classList.add("hidden");
+    }
 
+  });
+
+  // Tampilkan halaman yang dipilih
+  const halamanAktif = document.getElementById(page);
+
+  if (halamanAktif) {
+    halamanAktif.classList.remove("hidden");
+  }
+
+  // Muat data sesuai halaman
   if (page === "riwayat") {
+    tampilkanRiwayat();
+  }
 
-  tampilkanRiwayat();
-
+  if (page === "laporanBulanan") {
+    tampilkanLaporanBulanan();
   }
 
 }
