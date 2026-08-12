@@ -645,15 +645,23 @@ footer {
 </header>
 
 <nav>
-  <button onclick="showPage('kasir')">🛒 Kasir</button>
-  <button onclick="showPage('barangPage')">📦 Barang</button>
-  <button onclick="showPage('riwayat')">📋 Riwayat</button>
-  <button onclick="showPage('laporanPage'); tampilkanLaporanHariIni()">
-    📊 Laporan
+
+  <button onclick="showPage('kasir')">
+    🛒 Kasir
   </button>
-  <button onclick="showPage('laporanBulananPage'); tampilkanLaporanBulanan()">
-  📅 Bulanan
+
+  <button onclick="showPage('barangPage')">
+    📦 Barang
   </button>
+
+  <button onclick="showPage('riwayat')">
+    📋 Riwayat
+  </button>
+
+  <button onclick="showPage('laporanBulananPage')">
+    📅 Laporan
+  </button>
+
 </nav>
 
 <div class="container">
@@ -1807,17 +1815,21 @@ async function tampilkanRiwayat() {
    NAVIGASI
    ============================== */
 
+/* ==============================
+   PINDAH HALAMAN
+   ============================== */
+
 function showPage(page) {
 
   const pages = [
     "kasir",
     "barangPage",
     "riwayat",
-    "laporanBulanan"
+    "laporanBulananPage"
   ];
 
   // Sembunyikan semua halaman
-  pages.forEach(id => {
+  pages.forEach(function(id) {
 
     const halaman = document.getElementById(id);
 
@@ -1828,19 +1840,31 @@ function showPage(page) {
   });
 
   // Tampilkan halaman yang dipilih
-  const halamanAktif = document.getElementById(page);
+  const halamanAktif =
+    document.getElementById(page);
 
   if (halamanAktif) {
     halamanAktif.classList.remove("hidden");
   }
 
-  // Muat data sesuai halaman
+
+  // Jika membuka RIWAYAT
   if (page === "riwayat") {
-    tampilkanRiwayat();
+
+    if (typeof tampilkanRiwayat === "function") {
+      tampilkanRiwayat();
+    }
+
   }
 
-  if (page === "laporanBulanan") {
-    tampilkanLaporanBulanan();
+
+  // Jika membuka LAPORAN BULANAN
+  if (page === "laporanBulananPage") {
+
+    if (typeof tampilkanLaporanBulanan === "function") {
+      tampilkanLaporanBulanan();
+    }
+
   }
 
 }
