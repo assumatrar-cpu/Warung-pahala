@@ -964,18 +964,32 @@ const db = firebase.firestore();
 
   firebase.auth()
     .signInWithEmailAndPassword(email, password)
+
     .then(() => {
+
+      isAdmin = true;
 
       alert("✅ Login Admin berhasil!");
 
-      // Tampilkan menu Barang
-      document.getElementById("menuBarang").style.display = "block";
+      // Tampilkan tombol Barang
+      const menuBarang =
+        document.getElementById("menuBarang");
+
+      if (menuBarang) {
+        menuBarang.style.display = "block";
+      }
+
+      // Buka halaman Barang
+      showPage("barangPage");
 
     })
+
     .catch(error => {
 
+      isAdmin = false;
+
       alert(
-        "❌ Login gagal!\n\n" +
+        "❌ Login Admin gagal!\n\n" +
         error.message
       );
 
@@ -1844,17 +1858,46 @@ async function tampilkanRiwayat() {
    PINDAH HALAMAN
    ============================== */
 
+let isAdmin = false;
+
 function showPage(page) {
 
-  const pages = [
+  // Halaman yang boleh diakses pembeli
+  const pagesPembeli = [
     "kasir",
-    "barangPage",
     "riwayat",
+    "laporanHarianPage",
     "laporanBulananPage"
   ];
 
+  // Halaman yang boleh diakses Admin
+  const pagesAdmin = [
+    "kasir",
+    "barangPage",
+    "riwayat",
+    "laporanHarianPage",
+    "laporanBulananPage"
+  ];
+
+  // Tentukan halaman yang boleh dibuka
+  const pages = isAdmin ? pagesAdmin : pagesPembeli;
+
+  // Jika bukan admin tetapi mencoba membuka Barang
+  if (!isAdmin && page === "barangPage") {
+    alert("🔒 Halaman Barang hanya untuk Admin.");
+    return;
+  }
+
   // Sembunyikan semua halaman
-  pages.forEach(function(id) {
+  const semuaHalaman = [
+    "kasir",
+    "barangPage",
+    "riwayat",
+    "laporanHarianPage",
+    "laporanBulananPage"
+  ];
+
+  semuaHalaman.forEach(id => {
 
     const halaman = document.getElementById(id);
 
@@ -1865,31 +1908,23 @@ function showPage(page) {
   });
 
   // Tampilkan halaman yang dipilih
-  const halamanAktif =
-    document.getElementById(page);
+  const halamanAktif = document.getElementById(page);
 
   if (halamanAktif) {
     halamanAktif.classList.remove("hidden");
   }
 
-
-  // Jika membuka RIWAYAT
+  // Muat data
   if (page === "riwayat") {
-
-    if (typeof tampilkanRiwayat === "function") {
-      tampilkanRiwayat();
-    }
-
+    tampilkanRiwayat();
   }
 
+  if (page === "laporanHarianPage") {
+    tampilkanLaporanHariIni();
+  }
 
-  // Jika membuka LAPORAN BULANAN
   if (page === "laporanBulananPage") {
-
-    if (typeof tampilkanLaporanBulanan === "function") {
-      tampilkanLaporanBulanan();
-    }
-
+    tampilkanLaporanBulanan();
   }
 
 }
