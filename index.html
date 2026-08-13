@@ -709,46 +709,7 @@ footer {
 
 </section>
 
-  <!-- LAPORAN BULANAN -->
-<section id="laporanBulananPage" class="hidden">
-
-  <div class="card">
-
-    <h2>📅 Laporan Penjualan Bulanan</h2>
-
-    <p id="bulanLaporan"></p>
-
-    <div class="laporan-box">
-
-      <div class="laporan-item">
-        <div>💰 Omzet Bulan Ini</div>
-        <strong id="omzetBulanIni">Rp 0</strong>
-      </div>
-
-      <div class="laporan-item">
-        <div>🧾 Transaksi</div>
-        <strong id="jumlahTransaksiBulanIni">0</strong>
-      </div>
-
-      <div class="laporan-item">
-        <div>📦 Barang Terjual</div>
-        <strong id="barangTerjualBulanIni">0</strong>
-      </div>
-
-    </div>
-
-    <button
-      class="btn"
-      onclick="tampilkanLaporanBulanan()">
-      🔄 Refresh Laporan
-    </button>
-
-  </div>
-
-</section>
-
-
-<!-- BARANG -->
+  <!-- BARANG -->
 <section id="barangPage" class="hidden">
 
   <div class="card">
@@ -791,8 +752,7 @@ footer {
 
 </section>
 
-
-<!-- RIWAYAT -->
+  <!-- RIWAYAT -->
 <section id="riwayat">
 
   <div class="card">
@@ -893,80 +853,37 @@ footer {
 
 </section>
 
-<!-- BARANG -->
-<section id="barangPage" class="hidden">
-
-  <div class="card">
-  <h2>➕ Tambah Barang</h2>
-
-  <input
-    type="text"
-    id="namaBarangBaru"
-    placeholder="Nama barang"
-  >
-
-  <input
-    type="number"
-    id="hargaBarangBaru"
-    placeholder="Harga"
-  >
-
-  <input
-    type="number"
-    id="stokBarangBaru"
-    placeholder="Stok"
-  >
-
-  <button class="btn" onclick="tambahBarang()">
-    💾 Simpan Barang
-  </button>
-  </div>
-
-  <div class="card">
-    <h2>📦 Data Barang</h2>
-
-    <p>
-      Data barang diambil langsung dari Firebase Firestore.
-    </p>
-
-    <div id="dataBarang">
-      Memuat...
-    </div>
-  </div>
-
-</section>
-
-    <!-- LAPORAN PENJUALAN -->
-<section id="laporanPage" class="hidden">
+  <!-- LAPORAN BULANAN -->
+<section id="laporanBulananPage" class="hidden">
 
   <div class="card">
 
-    <h2>📊 Laporan Penjualan Hari Ini</h2>
+    <h2>📅 Laporan Penjualan Bulanan</h2>
 
-    <p id="tanggalLaporan"></p>
+    <p id="bulanLaporan"></p>
 
     <div class="laporan-box">
 
       <div class="laporan-item">
-        <div>💰 Omzet</div>
-        <strong id="omzetHariIni">Rp 0</strong>
+        <div>💰 Omzet Bulan Ini</div>
+        <strong id="omzetBulanIni">Rp 0</strong>
       </div>
 
       <div class="laporan-item">
         <div>🧾 Transaksi</div>
-        <strong id="jumlahTransaksiHariIni">0</strong>
+        <strong id="jumlahTransaksiBulanIni">0</strong>
       </div>
 
       <div class="laporan-item">
         <div>📦 Barang Terjual</div>
-        <strong id="barangTerjualHariIni">0</strong>
+        <strong id="barangTerjualBulanIni">0</strong>
       </div>
 
     </div>
 
     <button
       class="btn"
-      onclick="tampilkanLaporanHariIni()">
+      onclick="tampilkanLaporanBulanan()">
       🔄 Refresh Laporan
     </button>
 
@@ -974,22 +891,12 @@ footer {
 
 </section>
 
-    <!-- DAFTAR TRANSAKSI -->
-    <div id="history">
-      Memuat transaksi...
-    </div>
-
-  </div>
-
-</section>
-
-</section>
-
 </div>
 
 <footer>
   WARUNG PAHALA © 2026<br>
-  Masjid Miftahul Jannah yangsan
+  Masjid Miftahul Jannah yangsan<br>
+  gus ROHMAN🤭
 </footer>
 
 
