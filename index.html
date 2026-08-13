@@ -671,7 +671,10 @@ footer {
     🛒 Kasir
   </button>
 
-  <button onclick="showPage('barangPage')">
+  <button 
+    id="menubarang"
+    onclick="showPage('barangPage')"
+    style="display:none;">
     📦 Barang
   </button>
 
@@ -685,6 +688,10 @@ footer {
 
   <button onclick="showPage('laporanBulananPage')">
     📅 Laporan
+  </button>
+
+  <button onclick="loginAdmin()">
+  🔐 Admin
   </button>
 
 </nav>
@@ -924,6 +931,7 @@ footer {
 <!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <script>
 
@@ -943,6 +951,37 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
+
+  function loginAdmin() {
+
+  const email = prompt("Masukkan Email Admin:");
+
+  if (!email) return;
+
+  const password = prompt("Masukkan Password Admin:");
+
+  if (!password) return;
+
+  firebase.auth()
+    .signInWithEmailAndPassword(email, password)
+    .then(() => {
+
+      alert("✅ Login Admin berhasil!");
+
+      // Tampilkan menu Barang
+      document.getElementById("menuBarang").style.display = "block";
+
+    })
+    .catch(error => {
+
+      alert(
+        "❌ Login gagal!\n\n" +
+        error.message
+      );
+
+    });
+
+  }
 
 
 /* ==============================
