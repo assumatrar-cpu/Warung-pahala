@@ -90,6 +90,20 @@ nav button {
   padding: 15px;
 }
 
+  /* =========================
+   SWIPE ANTAR HALAMAN
+========================= */
+
+.container {
+  overflow: hidden;
+}
+
+.swipe-page {
+  width: 100%;
+  min-height: 300px;
+  touch-action: pan-y;
+}
+
 .card {
   background: white;
   border-radius: 14px;
@@ -678,7 +692,7 @@ footer {
 <div class="container">
 
 <!-- KASIR -->
-<section id="kasir">
+<section id="kasir" class="swipe-page">
 
   <div class="card">
     <h2>🛒 Kasir Warung</h2>
@@ -717,7 +731,7 @@ footer {
 </section>
 
   <!-- BARANG -->
-<section id="barangPage" class="hidden">
+<section id="barangPage" class="swipe-page hidden">
 
   <div class="card">
   <h2>➕ Tambah Barang</h2>
@@ -760,7 +774,7 @@ footer {
 </section>
 
   <!-- RIWAYAT -->
-<section id="riwayat">
+<section id="riwayat" class="swipe-page">
 
   <div class="card">
 
@@ -797,7 +811,7 @@ footer {
   <!-- =========================
      LAPORAN HARIAN
 ========================= -->
-<section id="laporanHarianPage" class="hidden">
+<section id="laporanHarianPage" class="swipe-page hidden">
 
   <div class="card">
 
@@ -861,7 +875,7 @@ footer {
 </section>
 
   <!-- LAPORAN BULANAN -->
-<section id="laporanBulananPage" class="hidden">
+<section id="laporanBulananPage" class="swipe-page hidden">
 
   <div class="card">
 
@@ -2322,6 +2336,77 @@ window.onload = function() {
    ============================== */
 
 tampilkanKeranjang();
+
+  /* =========================
+   SWIPE ANTAR HALAMAN
+========================= */
+
+const halamanSwipe = [
+  "kasir",
+  "barangPage",
+  "riwayat",
+  "laporanHarianPage",
+  "laporanBulananPage"
+];
+
+let halamanSekarang = 0;
+let posisiAwalX = 0;
+let posisiAkhirX = 0;
+
+document.addEventListener("touchstart", function(e) {
+
+  posisiAwalX = e.touches[0].clientX;
+
+});
+
+document.addEventListener("touchend", function(e) {
+
+  posisiAkhirX = e.changedTouches[0].clientX;
+
+  const jarak = posisiAkhirX - posisiAwalX;
+
+  // Geser ke kiri
+  if (jarak < -80) {
+
+    pindahHalamanSwipe(1);
+
+  }
+
+  // Geser ke kanan
+  if (jarak > 80) {
+
+    pindahHalamanSwipe(-1);
+
+  }
+
+});
+
+
+function pindahHalamanSwipe(arah) {
+
+  let halamanBaru =
+    halamanSekarang + arah;
+
+  if (halamanBaru < 0) {
+    halamanBaru = 0;
+  }
+
+  if (halamanBaru >= halamanSwipe.length) {
+    halamanBaru = halamanSwipe.length - 1;
+  }
+
+  if (halamanBaru === halamanSekarang) {
+    return;
+  }
+
+  halamanSekarang = halamanBaru;
+
+  const idHalaman =
+    halamanSwipe[halamanSekarang];
+
+  showPage(idHalaman);
+
+}
 
 </script>
 
