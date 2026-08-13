@@ -658,6 +658,10 @@ footer {
     📋 Riwayat
   </button>
 
+  <button onclick="showPage('laporanHarianPage')">
+  📊 Harian
+  </button>
+
   <button onclick="showPage('laporanBulananPage')">
     📅 Laporan
   </button>
@@ -817,6 +821,72 @@ footer {
       class="btn"
       onclick="tampilkanRiwayat()">
       🔄 Refresh Riwayat
+    </button>
+
+  </div>
+
+</section>
+
+  <!-- =========================
+     LAPORAN HARIAN
+========================= -->
+<section id="laporanHarianPage" class="hidden">
+
+  <div class="card">
+
+    <h2>📊 Laporan Penjualan Harian</h2>
+
+    <p id="tanggalLaporanHariIni"></p>
+
+    <div class="laporan-box">
+
+      <div class="laporan-item">
+        <div>💰 Omzet Hari Ini</div>
+        <strong id="omzetHariIni">Rp 0</strong>
+      </div>
+
+      <div class="laporan-item">
+        <div>🧾 Jumlah Transaksi</div>
+        <strong id="jumlahTransaksiHariIni">0</strong>
+      </div>
+
+      <div class="laporan-item">
+        <div>📦 Barang Terjual</div>
+        <strong id="barangTerjualHariIni">0</strong>
+      </div>
+
+    </div>
+
+    <h3 style="color:#006b45;margin-top:20px;">
+      💵 Rincian Pembayaran
+    </h3>
+
+    <div class="history-item">
+
+      <div style="display:flex;justify-content:space-between;">
+        <span>Uang Tunai</span>
+        <b id="uangTunaiHariIni">Rp 0</b>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;">
+        <span>Kembalian</span>
+        <b id="kembalianHariIni">Rp 0</b>
+      </div>
+
+    </div>
+
+    <h3 style="color:#006b45;margin-top:20px;">
+      🛍️ Barang Terlaris Hari Ini
+    </h3>
+
+    <div id="barangTerlarisHariIni">
+      Belum ada penjualan.
+    </div>
+
+    <button
+      class="btn"
+      onclick="tampilkanLaporanHariIni()">
+      🔄 Refresh Laporan
     </button>
 
   </div>
