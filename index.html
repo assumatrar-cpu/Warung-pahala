@@ -1860,74 +1860,33 @@ async function tampilkanRiwayat() {
 
 let isAdmin = false;
 
-function showPage(page) {
+firebase.auth().onAuthStateChanged(function(user) {
 
-  // Halaman yang boleh diakses pembeli
-  const pagesPembeli = [
-    "kasir",
-    "riwayat",
-    "laporanHarianPage",
-    "laporanBulananPage"
-  ];
+  if (user) {
 
-  // Halaman yang boleh diakses Admin
-  const pagesAdmin = [
-    "kasir",
-    "barangPage",
-    "riwayat",
-    "laporanHarianPage",
-    "laporanBulananPage"
-  ];
+    isAdmin = true;
 
-  // Tentukan halaman yang boleh dibuka
-  const pages = isAdmin ? pagesAdmin : pagesPembeli;
+    const menuBarang =
+      document.getElementById("menuBarang");
 
-  // Jika bukan admin tetapi mencoba membuka Barang
-  if (!isAdmin && page === "barangPage") {
-    alert("🔒 Halaman Barang hanya untuk Admin.");
-    return;
-  }
-
-  // Sembunyikan semua halaman
-  const semuaHalaman = [
-    "kasir",
-    "barangPage",
-    "riwayat",
-    "laporanHarianPage",
-    "laporanBulananPage"
-  ];
-
-  semuaHalaman.forEach(id => {
-
-    const halaman = document.getElementById(id);
-
-    if (halaman) {
-      halaman.classList.add("hidden");
+    if (menuBarang) {
+      menuBarang.style.display = "block";
     }
 
-  });
+  } else {
 
-  // Tampilkan halaman yang dipilih
-  const halamanAktif = document.getElementById(page);
+    isAdmin = false;
 
-  if (halamanAktif) {
-    halamanAktif.classList.remove("hidden");
+    const menuBarang =
+      document.getElementById("menuBarang");
+
+    if (menuBarang) {
+      menuBarang.style.display = "none";
+    }
+
   }
 
-  // Muat data
-  if (page === "riwayat") {
-    tampilkanRiwayat();
-  }
-
-  if (page === "laporanHarianPage") {
-    tampilkanLaporanHariIni();
-  }
-
-  if (page === "laporanBulananPage") {
-    tampilkanLaporanBulanan();
-  }
-
-}
+});
 
 
 /* ==============================
