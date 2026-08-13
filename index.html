@@ -1669,6 +1669,39 @@ async function tampilkanRiwayat() {
 
       }
 
+      function cetakTransaksi(id) {
+  const transaksi = document.getElementById(id);
+
+  if (!transaksi) {
+    alert("Transaksi tidak ditemukan");
+    return;
+  }
+
+  const isi = transaksi.innerHTML;
+
+  const jendela = window.open("", "_blank");
+
+  jendela.document.write(`
+    <html>
+    <head>
+      <title>Cetak Transaksi</title>
+      <style>
+        body {
+          font-family: Arial;
+          padding: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      ${isi}
+    </body>
+    </html>
+  `);
+
+  jendela.document.close();
+  jendela.print();
+      }
+
       container.innerHTML += `
 
         <div class="history-item">
@@ -1707,25 +1740,35 @@ async function tampilkanRiwayat() {
 
           </div>
 
-          <div class="riwayat-pembayaran">
+              <div class="riwayat-pembayaran">
 
-            💵 Tunai:
-            <b>
-              Rp ${formatRupiah(
-                Number(data.uangBayar || 0)
-              )}
-            </b>
+      💵 Tunai:
+      <b>
+        Rp ${formatRupiah(
+          Number(data.uangBayar || 0)
+        )}
+      </b>
 
-            <br>
+      <br>
 
-            🔄 Kembalian:
-            <span class="riwayat-kembalian">
-              Rp ${formatRupiah(
-                Number(data.kembalian || 0)
-              )}
-            </span>
+      🔄 Kembalian:
+      <span class="riwayat-kembalian">
+        Rp ${formatRupiah(
+          Number(data.kembalian || 0)
+        )}
+      </span>
 
-          </div>
+    </div>
+
+    <!-- TOMBOL CETAK -->
+    <button
+      class="btn-cetak-riwayat"
+      onclick="cetakStrukRiwayat('${data.id}')"
+    >
+      🖨️ Cetak Struk
+    </button>
+
+</div>
 
         </div>
 
