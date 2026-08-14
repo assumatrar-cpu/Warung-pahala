@@ -1372,28 +1372,33 @@ async function bayar() {
       "WP-" +
       String(nomorTransaksi).padStart(5, "0");
 
-    // Simpan transaksi
-    await db.collection("transaksi").add({
+    // Pastikan pembeli sudah login
+const user = firebase.auth().currentUser;
 
-      uid: firebase.auth().currentUser.uid,
+if (!user) {
+  alert("❌ Pembeli belum login. Silakan tunggu sebentar.");
+  return;
+}
 
-      nomorTransaksi: kodeTransaksi,
+// Simpan transaksi
+await db.collection("transaksi").add({
 
-      uid:
-        firebase.auth().currentuser.uid,
+  uid: user.uid,
 
-      waktu:
-        firebase.firestore.FieldValue.serverTimestamp(),
+  nomorTransaksi: kodeTransaksi,
 
-      items: keranjang,
+  waktu:
+    firebase.firestore.FieldValue.serverTimestamp(),
 
-      total: total,
+  items: keranjang,
 
-      uangBayar: uangBayar,
+  total: total,
 
-      kembalian: kembalian
+  uangBayar: uangBayar,
 
-    });
+  kembalian: kembalian
+
+});
 
     // Kurangi stok
     for (const item of keranjang) {
