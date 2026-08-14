@@ -1375,6 +1375,8 @@ async function bayar() {
     // Simpan transaksi
     await db.collection("transaksi").add({
 
+      uid: firebase.auth().currentUser.uid,
+
       nomorTransaksi: kodeTransaksi,
 
       waktu:
