@@ -984,17 +984,34 @@ const db = firebase.firestore();
 // LOGIN PEMBELI OTOMATIS
 // ==============================
 
-firebase.auth().onAuthStateChanged(user => {
+firebase.auth().onAuthStateChanged(async user => {
 
   if (!user) {
 
-    firebase.auth().signInAnonymously()
-      .then(() => {
-        console.log("✅ Pembeli mendapatkan UID Firebase");
-      })
-      .catch(error => {
-        console.error("❌ Login pembeli gagal:", error);
-      });
+    isAdmin = false;
+
+    try {
+      await firebase.auth().signInAnonymously();
+      console.log("✅ Pembeli login Anonymous");
+    } catch (error) {
+      console.error("❌ Login Anonymous gagal:", error);
+    }
+
+    return;
+  }
+
+  // ADMIN ditentukan dari akun email
+  if (user.email) {
+
+    isAdmin = true;
+
+    console.log("🔐 Login sebagai ADMIN:", user.email);
+
+  } else {
+
+    isAdmin = false;
+
+    console.log("👤 Login sebagai PEMBELI:", user.uid);
 
   }
 
