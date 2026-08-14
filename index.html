@@ -1697,11 +1697,33 @@ async function tampilkanRiwayat() {
 
   try {
 
-    const snapshot = await db
-      .collection("transaksi")
-      .orderBy("waktu", "desc")
-      .limit(50)
-      .get();
+    const user = firebase.auth().currentUser;
+
+if (!user) {
+  container.innerHTML = "⏳ Menunggu login...";
+  return;
+}
+
+let query = db.collection("transaksi");
+
+if (isAdmin) {
+
+  // ADMIN: melihat semua transaksi
+  query = query
+    .orderBy("waktu", "desc")
+    .limit(50);
+
+} else {
+
+  // PEMBELI: hanya melihat transaksi miliknya
+  query = query
+    .where("uid", "==", user.uid)
+    .orderBy("waktu", "desc")
+    .limit(50);
+
+}
+
+const snapshot = await query.get();
 
     container.innerHTML = "";
 
