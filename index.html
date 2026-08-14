@@ -128,8 +128,31 @@ h2 {
 
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+  grid-template-columns: repeat(6, 150px);
   gap: 10px;
+  overflow-x: auto;
+  padding: 5px 5px 12px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.product {
+  width: 150px;
+  min-width: 150px;
+  border: 2px solid #d8eadd;
+  border-radius: 12px;
+  padding: 10px;
+  background: #f9fff9;
+}
+
+/* Scrollbar */
+.products::-webkit-scrollbar {
+  height: 7px;
+}
+
+.products::-webkit-scrollbar-thumb {
+  background: #006b45;
+  border-radius: 10px;
 }
 
 .product {
