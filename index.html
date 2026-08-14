@@ -1379,6 +1379,9 @@ async function bayar() {
 
       nomorTransaksi: kodeTransaksi,
 
+      uid:
+        firebase.auth().currentuser.uid,
+
       waktu:
         firebase.firestore.FieldValue.serverTimestamp(),
 
