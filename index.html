@@ -980,6 +980,26 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
+  // ==============================
+// LOGIN PEMBELI OTOMATIS
+// ==============================
+
+firebase.auth().onAuthStateChanged(user => {
+
+  if (!user) {
+
+    firebase.auth().signInAnonymously()
+      .then(() => {
+        console.log("✅ Pembeli mendapatkan UID Firebase");
+      })
+      .catch(error => {
+        console.error("❌ Login pembeli gagal:", error);
+      });
+
+  }
+
+});
+
   function loginAdmin() {
 
   const email = prompt("Masukkan Email Admin:");
