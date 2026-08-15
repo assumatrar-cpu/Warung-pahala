@@ -1080,6 +1080,37 @@ firebase.auth().onAuthStateChanged(async user => {
     });
   }
 
+  async function pastikanPembeliLogin() {
+
+  let user = firebase.auth().currentUser;
+
+  if (user) {
+    return user;
+  }
+
+  try {
+
+    const hasil =
+      await firebase.auth().signInAnonymously();
+
+    return hasil.user;
+
+  } catch (error) {
+
+    console.error(
+      "Gagal membuat sesi pembeli:",
+      error
+    );
+
+    alert(
+      "❌ Gagal memulai sesi pembeli:\n" +
+      error.message
+    );
+
+    return null;
+  }
+  }
+
 
 /* ==============================
    DATA
@@ -1408,10 +1439,9 @@ async function bayar() {
       String(nomorTransaksi).padStart(5, "0");
 
     // Pastikan pembeli sudah login
-const user = firebase.auth().currentUser;
+const user = await pastikanPembeliLogin();
 
 if (!user) {
-  alert("❌ Pembeli belum login. Silakan tunggu sebentar.");
   return;
 }
 
