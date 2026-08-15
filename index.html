@@ -699,7 +699,7 @@ footer {
   </button>
 
   <button 
-    id="menubarang"
+    id="menuBarang"
     onclick="showPage('barangPage')"
     style="display:none;">
     📦 Barang
@@ -1020,31 +1020,22 @@ firebase.auth().onAuthStateChanged(async user => {
   function loginAdmin() {
 
   const email = prompt("Masukkan Email Admin:");
-
   if (!email) return;
 
   const password = prompt("Masukkan Password Admin:");
-
   if (!password) return;
 
   firebase.auth()
     .signInWithEmailAndPassword(email, password)
 
-    .then(() => {
+    .then(userCredential => {
 
       isAdmin = true;
 
+      document.getElementById("menuBarang").style.display = "block";
+
       alert("✅ Login Admin berhasil!");
 
-      // Tampilkan tombol Barang
-      const menuBarang =
-        document.getElementById("menuBarang");
-
-      if (menuBarang) {
-        menuBarang.style.display = "block";
-      }
-
-      // Buka halaman Barang
       showPage("barangPage");
 
     })
@@ -1053,13 +1044,14 @@ firebase.auth().onAuthStateChanged(async user => {
 
       isAdmin = false;
 
+      document.getElementById("menuBarang").style.display = "none";
+
       alert(
         "❌ Login Admin gagal!\n\n" +
         error.message
       );
 
     });
-
   }
 
 
@@ -2099,6 +2091,11 @@ function formatRupiah(angka) {
   const harga = Number(document.getElementById("hargaBarangBaru").value);
   const stok = Number(document.getElementById("stokBarangBaru").value);
 
+  if (!isAdmin) {
+    alert("🔒 Hanya Admin yang boleh menambah barang.");
+    return;
+  }
+
   if (!nama) {
     alert("Nama barang belum diisi!");
     return;
@@ -2136,6 +2133,11 @@ function formatRupiah(angka) {
   async function editBarang(id) {
 
   const b = barang.find(x => x.id === id);
+
+  if (!isAdmin) {
+    alert("🔒 Hanya Admin yang boleh menambah barang.");
+    return;
+    }
 
   if (!b) {
     alert("Barang tidak ditemukan.");
@@ -2209,6 +2211,11 @@ function formatRupiah(angka) {
 async function hapusBarang(id) {
 
   const b = barang.find(x => x.id === id);
+
+  if (!isAdmin) {
+    alert("🔒 Hanya Admin yang boleh menambah barang.");
+    return;
+  }
 
   if (!b) {
     alert("Barang tidak ditemukan.");
