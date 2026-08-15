@@ -699,7 +699,7 @@ footer {
   </button>
 
   <button 
-    id="menuBarang"
+    id="menubarang"
     onclick="showPage('barangPage')"
     style="display:none;">
     📦 Barang
@@ -1030,9 +1030,35 @@ firebase.auth().onAuthStateChanged(async user => {
 
     .then(userCredential => {
 
+      const user = userCredential.user;
+      const emailLogin = (user.email || "").toLowerCase().trim();
+
+      // DAFTAR EMAIL ADMIN
+      const daftarAdmin = [
+        "assumatrar@gmail.com",
+        "miftahuljannahbusan@gmail.com"
+      ];
+
+      // Cek apakah email termasuk Admin
+      if (!daftarAdmin.includes(emailLogin)) {
+
+        isAdmin = false;
+
+        document.getElementById("menubarang").style.display = "none";
+
+        alert("🔒 Akun ini bukan Admin.");
+
+        firebase.auth().signOut();
+
+        showPage("kasir");
+
+        return;
+      }
+
+      // Jika email memang Admin
       isAdmin = true;
 
-      document.getElementById("menuBarang").style.display = "block";
+      document.getElementById("menubarang").style.display = "block";
 
       alert("✅ Login Admin berhasil!");
 
@@ -1044,7 +1070,7 @@ firebase.auth().onAuthStateChanged(async user => {
 
       isAdmin = false;
 
-      document.getElementById("menuBarang").style.display = "none";
+      document.getElementById("menubarang").style.display = "none";
 
       alert(
         "❌ Login Admin gagal!\n\n" +
