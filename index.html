@@ -675,6 +675,24 @@ footer {
     margin: 6px 0 !important;
   }
 }
+
+  /* =========================
+   DAFTAR BARANG
+   ========================= */
+
+#daftarBarang {
+  max-height: 720px;       /* tinggi sekitar 3 baris */
+  overflow-y: auto;        /* hanya scroll ke bawah */
+  overflow-x: hidden;     /* tidak bisa scroll ke samping */
+  padding: 10px;
+}
+
+/* Tampilan barang */
+#daftarBarang {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
 </style>
 </head>
 
