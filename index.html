@@ -2528,11 +2528,19 @@ function formatRupiah(angka) {
   if (hargaBaru === null) return;
 
   const stokBaru = prompt(
-    "Stok:",
-    b.stok || 0
-  );
+  "Stok:",
+  b.stok || 0
+);
 
-  if (stokBaru === null) return;
+if (stokBaru === null) return;
+
+// TANGGAL EXPIRED
+const expiredBaru = prompt(
+  "Tanggal Expired (YYYY-MM-DD):",
+  b.expired || ""
+);
+
+if (expiredBaru === null) return;
 
   const harga = Number(hargaBaru);
   const stok = Number(stokBaru);
@@ -2555,12 +2563,13 @@ function formatRupiah(angka) {
   try {
 
     await db.collection("barang")
-      .doc(id)
-      .update({
-        nama: namaBaru.trim(),
-        harga: harga,
-        stok: stok
-      });
+  .doc(id)
+  .update({
+    nama: namaBaru.trim(),
+    harga: harga,
+    stok: stok,
+    expired: expiredBaru.trim()
+  });
 
     alert("✅ Barang berhasil diperbarui.");
 
