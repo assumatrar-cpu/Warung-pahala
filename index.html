@@ -847,6 +847,13 @@ footer {
       Data barang diambil langsung dari Firebase Firestore.
     </p>
 
+    <input
+  type="text"
+  id="searchEditBarang"
+  placeholder="🔍 Cari barang yang mau diedit..."
+  oninput="tampilkanDataBarang()"
+>
+
     <div id="dataBarang">
       Memuat...
     </div>
@@ -1629,6 +1636,14 @@ function tampilkanDataBarang() {
   const container =
     document.getElementById("dataBarang");
 
+  const input =
+    document.getElementById("searchEditBarang");
+
+  const pencarian =
+    input
+      ? input.value.trim().toLowerCase()
+      : "";
+
   container.innerHTML = "";
 
   if (barang.length === 0) {
@@ -1636,25 +1651,75 @@ function tampilkanDataBarang() {
     return;
   }
 
-  barang.forEach(b => {
+  // FILTER NAMA ATAU BARCODE
+  const hasil = barang.filter(b => {
 
-    const nama = b.nama || "-";
-    const harga = Number(b.harga || 0);
-    const stok = Number(b.stok || 0);
+    const nama =
+      String(b.nama || "").toLowerCase();
+
+    const barcode =
+      String(b.barcode || "").toLowerCase();
+
+    return (
+      nama.includes(pencarian) ||
+      barcode.includes(pencarian)
+    );
+
+  });
+
+  if (hasil.length === 0) {
+
+    container.innerHTML = `
+      <p style="color:#c62828;">
+        ❌ Barang tidak ditemukan.
+      </p>
+    `;
+
+    return;
+  }
+
+  hasil.forEach(b => {
+
+    const nama =
+      b.nama || "-";
+
+    const harga =
+      Number(b.harga || 0);
+
+    const stok =
+      Number(b.stok || 0);
+
+    const barcode =
+      b.barcode || "-";
+
+    const expired =
+      b.expired || "-";
 
     container.innerHTML += `
 
       <div class="history-item">
 
-        <b>${nama}</b><br>
+        <b>${nama}</b>
 
-        Harga:
+        <br><br>
+
+        💰 Harga:
         Rp ${formatRupiah(harga)}
 
         <br>
 
-        Stok:
+        📦 Stok:
         ${stok}
+
+        <br>
+
+        🏷️ Barcode:
+        ${barcode}
+
+        <br>
+
+        📅 Expired:
+        ${expired}
 
         <br><br>
 
@@ -1678,6 +1743,7 @@ function tampilkanDataBarang() {
     `;
 
   });
+
 }
 
 
