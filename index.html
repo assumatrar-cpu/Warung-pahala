@@ -2685,7 +2685,7 @@ function formatRupiah(angka) {
   if (!isAdmin) {
     alert("🔒 Hanya Admin yang boleh menambah barang.");
     return;
-    }
+  }
 
   if (!b) {
     alert("Barang tidak ditemukan.");
@@ -2707,19 +2707,27 @@ function formatRupiah(angka) {
   if (hargaBaru === null) return;
 
   const stokBaru = prompt(
-  "Stok:",
-  b.stok || 0
-);
+    "Stok:",
+    b.stok || 0
+  );
 
-if (stokBaru === null) return;
+  if (stokBaru === null) return;
 
-// TANGGAL EXPIRED
-const expiredBaru = prompt(
-  "Tanggal Expired (YYYY-MM-DD):",
-  b.expired || ""
-);
+  // BARCODE
+  const barcodeBaru = prompt(
+    "Barcode:",
+    b.barcode || ""
+  );
 
-if (expiredBaru === null) return;
+  if (barcodeBaru === null) return;
+
+  // TANGGAL EXPIRED
+  const expiredBaru = prompt(
+    "Tanggal Expired (YYYY-MM-DD):",
+    b.expired || ""
+  );
+
+  if (expiredBaru === null) return;
 
   const harga = Number(hargaBaru);
   const stok = Number(stokBaru);
@@ -2742,16 +2750,20 @@ if (expiredBaru === null) return;
   try {
 
     await db.collection("barang")
-  .doc(id)
-  .update({
-    nama: namaBaru.trim(),
-    harga: harga,
-    stok: stok,
-    barcode: barcodeBaru.trim(),
-    expired: expiredBaru.trim()
-  });
+      .doc(id)
+      .update({
+        nama: namaBaru.trim(),
+        harga: harga,
+        stok: stok,
+        barcode: barcodeBaru.trim(),
+        expired: expiredBaru.trim()
+      });
 
     alert("✅ Barang berhasil diperbarui.");
+
+    // Tampilkan ulang data
+    tampilkanDataBarang();
+    tampilkanBarang();
 
   } catch (error) {
 
@@ -2763,7 +2775,7 @@ if (expiredBaru === null) return;
     );
 
   }
-}
+  }
 
 
 async function hapusBarang(id) {
