@@ -765,6 +765,35 @@ footer {
   <div class="card">
     <h2>🧺 Keranjang</h2>
 
+    <button
+  class="btn"
+  onclick="bukaScanner()"
+  style="background:#1565c0;"
+>
+  📷 Scan Barcode
+</button>
+
+<div
+  id="scannerBox"
+  class="hidden"
+  style="
+    margin-top:15px;
+    padding:10px;
+    background:#f5f5f5;
+    border-radius:10px;
+  "
+>
+  <div id="reader"></div>
+
+  <button
+    class="btn"
+    onclick="tutupScanner()"
+    style="background:#c62828;"
+  >
+    ❌ Tutup Scanner
+  </button>
+</div>
+
     <div id="cart">
       Keranjang masih kosong.
     </div>
@@ -1015,6 +1044,9 @@ footer {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script> 
+  
 <script>
 
 /* ==============================
@@ -1203,7 +1235,8 @@ db.collection("barang").onSnapshot(snapshot => {
 
 function tampilkanBarang() {
 
-  const container = document.getElementById("products");
+  const container =
+    document.getElementById("products");
 
   const search =
     document.getElementById("search").value.toLowerCase();
@@ -1226,20 +1259,61 @@ function tampilkanBarang() {
 
   hasil.forEach(b => {
 
-    const stok = Number(b.stok || 0);
-    const harga = Number(b.harga || 0);
+    const stok =
+      Number(b.stok || 0);
 
+    const harga =
+      Number(b.harga || 0);
+
+    // CEK EXPIRED
     const statusExpired =
-  cekExpired(b.expired);
+      cekExpired(b.expired);
 
-const barangExpired =
-  statusExpired.expired;
+    const barangExpired =
+      statusExpired.expired;
 
+    // BARCODE
+    const barcode =
+      String(b.barcode || "").trim();
+
+    let barcodeHTML = "";
+
+    if (barcode) {
+
+      barcodeHTML = `
+        <div style="
+          margin-top:8px;
+          text-align:center;
+          background:white;
+          padding:5px;
+          border-radius:6px;
+        ">
+
+          <svg
+            class="barcode"
+            data-barcode="${barcode}"
+          ></svg>
+
+          <div style="
+            font-size:11px;
+            margin-top:3px;
+          ">
+            ${barcode}
+          </div>
+
+        </div>
+      `;
+
+    }
+
+    // TAMPILKAN BARANG
     container.innerHTML += `
 
       <div class="product">
 
-        <h3>${b.nama || "-"}</h3>
+        <h3>
+          ${b.nama || "-"}
+        </h3>
 
         <div class="price">
           Rp ${formatRupiah(harga)}
@@ -1249,35 +1323,74 @@ const barangExpired =
           Stok: ${stok}
         </div>
 
-        <button
-  onclick="tambahKeranjang('${b.id}')"
-  ${stok <= 0 || barangExpired ? "disabled" : ""}
->
-  ${
-    barangExpired
-      ? "EXPIRED"
-      : stok <= 0
-        ? "HABIS"
-        : "TAMBAH"
-  }
-</button>
+        <!-- STATUS EXPIRED -->
+        <div style="
+          color:${statusExpired.warna};
+          font-weight:bold;
+          font-size:13px;
+          margin-top:5px;
+        ">
+          ${statusExpired.teks}
+        </div>
 
-<div
-  style="
-    color:${statusExpired.warna};
-    font-weight:bold;
-    font-size:13px;
-    margin-top:5px;
-  "
->
-  ${statusExpired.teks}
-</div>
+        <!-- BARCODE -->
+        ${barcodeHTML}
+
+        <button
+          onclick="tambahKeranjang('${b.id}')"
+          ${(stok <= 0 || barangExpired)
+            ? "disabled"
+            : ""}
+        >
+          ${
+            barangExpired
+              ? "EXPIRED"
+              : stok <= 0
+                ? "HABIS"
+                : "TAMBAH"
+          }
+        </button>
 
       </div>
 
     `;
 
   });
+
+  // BUAT GAMBAR BARCODE
+  document
+    .querySelectorAll(".barcode")
+    .forEach(svg => {
+
+      const kode =
+        svg.dataset.barcode;
+
+      try {
+
+        JsBarcode(svg, kode, {
+
+          format: "CODE128",
+
+          width: 1.5,
+
+          height: 45,
+
+          displayValue: false,
+
+          margin: 2
+
+        });
+
+      } catch (error) {
+
+        console.log(
+          "Barcode tidak valid:",
+          kode
+        );
+
+      }
+
+    });
 
 }
 
@@ -3191,6 +3304,175 @@ function pindahHalamanSwipe(arah) {
     `;
 
   }
+
+  }
+
+  // ==============================
+// SCANNER BARCODE
+// ==============================
+
+let scanner = null;
+
+async function bukaScanner() {
+
+  const box =
+    document.getElementById("scannerBox");
+
+  box.classList.remove("hidden");
+
+  if (scanner) {
+    return;
+  }
+
+  scanner =
+    new Html5Qrcode("reader");
+
+  try {
+
+    await scanner.start(
+
+      {
+        facingMode: "environment"
+      },
+
+      {
+        fps: 10,
+
+        qrbox: {
+          width: 280,
+          height: 150
+        }
+      },
+
+      (decodedText) => {
+
+        console.log(
+          "Barcode terbaca:",
+          decodedText
+        );
+
+        cariBarangDenganBarcode(decodedText);
+
+      },
+
+      (errorMessage) => {
+        // Tidak perlu menampilkan error setiap frame
+      }
+
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Kamera tidak dapat dibuka.\n\n" +
+      error.message
+    );
+
+    tutupScanner();
+
+  }
+
+}
+
+  function cariBarangDenganBarcode(kode) {
+
+  const kodeScan =
+    String(kode).trim();
+
+  const b =
+    barang.find(item =>
+      String(item.barcode || "").trim() === kodeScan
+    );
+
+  if (!b) {
+
+    alert(
+      "❌ Barang dengan barcode:\n" +
+      kodeScan +
+      "\n\nTidak ditemukan."
+    );
+
+    return;
+
+  }
+
+  const stok =
+    Number(b.stok || 0);
+
+  if (stok <= 0) {
+
+    alert(
+      "⚠️ Stok barang habis:\n" +
+      b.nama
+    );
+
+    return;
+
+  }
+
+  // Cek expired
+  if (b.expired) {
+
+    const hariIni =
+      new Date();
+
+    const tanggalExpired =
+      new Date(b.expired);
+
+    hariIni.setHours(0,0,0,0);
+    tanggalExpired.setHours(0,0,0,0);
+
+    if (tanggalExpired < hariIni) {
+
+      alert(
+        "❌ Barang sudah EXPIRED:\n\n" +
+        b.nama +
+        "\nExpired: " +
+        b.expired
+      );
+
+      return;
+
+    }
+
+  }
+
+  // Masukkan ke keranjang
+  tambahKeranjang(b.id);
+
+  alert(
+    "✅ Barang ditambahkan:\n\n" +
+    b.nama
+  );
+
+  }
+
+  async function tutupScanner() {
+
+  const box =
+    document.getElementById("scannerBox");
+
+  if (scanner) {
+
+    try {
+
+      await scanner.stop();
+
+      scanner.clear();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+    scanner = null;
+
+  }
+
+  box.classList.add("hidden");
 
   }
 
