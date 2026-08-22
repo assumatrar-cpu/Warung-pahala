@@ -806,10 +806,39 @@ footer {
     placeholder="Stok"
   >
 
+    <input
+  type="text"
+  id="barcodeBarangBaru"
+  placeholder="Barcode"
+>
+
+    <input
+  type="date"
+  id="expiredBarangBaru"
+  placeholder="Tanggal Expired"
+>
+
   <button class="btn" onclick="tambahBarang()">
     💾 Simpan Barang
   </button>
   </div>
+
+  <h2>📥 Import Barang dari Excel</h2>
+
+<input
+  type="file"
+  id="fileExcel"
+  accept=".xlsx,.xls"
+>
+
+<button
+  class="btn"
+  onclick="importExcelBarang()"
+>
+  📥 Import Excel
+</button>
+
+<div id="statusImport"></div>
 
   <div class="card">
     <h2>📦 Data Barang</h2>
@@ -978,7 +1007,7 @@ footer {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>
 
 /* ==============================
@@ -1193,6 +1222,12 @@ function tampilkanBarang() {
     const stok = Number(b.stok || 0);
     const harga = Number(b.harga || 0);
 
+    const statusExpired =
+  cekExpired(b.expired);
+
+const barangExpired =
+  statusExpired.expired;
+
     container.innerHTML += `
 
       <div class="product">
@@ -1208,11 +1243,28 @@ function tampilkanBarang() {
         </div>
 
         <button
-          onclick="tambahKeranjang('${b.id}')"
-          ${stok <= 0 ? "disabled" : ""}
-        >
-          ${stok <= 0 ? "HABIS" : "TAMBAH"}
-        </button>
+  onclick="tambahKeranjang('${b.id}')"
+  ${stok <= 0 || barangExpired ? "disabled" : ""}
+>
+  ${
+    barangExpired
+      ? "EXPIRED"
+      : stok <= 0
+        ? "HABIS"
+        : "TAMBAH"
+  }
+</button>
+
+<div
+  style="
+    color:${statusExpired.warna};
+    font-weight:bold;
+    font-size:13px;
+    margin-top:5px;
+  "
+>
+  ${statusExpired.teks}
+</div>
 
       </div>
 
@@ -1232,6 +1284,21 @@ function tambahKeranjang(id) {
   const b = barang.find(x => x.id === id);
 
   if (!b) return;
+
+  const statusExpired =
+  cekExpired(b.expired);
+
+if (statusExpired.expired) {
+
+  alert(
+    "🔴 BARANG TIDAK BISA DIBELI\n\n" +
+    b.nama +
+    "\n" +
+    statusExpired.teks
+  );
+
+  return;
+}
 
   const item = keranjang.find(x => x.id === id);
 
@@ -2161,47 +2228,275 @@ function formatRupiah(angka) {
   }
 
   async function tambahBarang() {
-  const nama = document.getElementById("namaBarangBaru").value.trim();
-  const harga = Number(document.getElementById("hargaBarangBaru").value);
-  const stok = Number(document.getElementById("stokBarangBaru").value);
+
+  const nama =
+    document.getElementById("namaBarangBaru")
+      .value.trim();
+
+  const harga =
+    Number(
+      document.getElementById("hargaBarangBaru")
+        .value
+    );
+
+  const stok =
+    Number(
+      document.getElementById("stokBarangBaru")
+        .value
+    );
+
+  const barcode =
+    document.getElementById("barcodeBarangBaru")
+      .value.trim();
+
+  const expired =
+    document.getElementById("expiredBarangBaru")
+      .value;
+
+  // ==========================
+  // CEK ADMIN
+  // ==========================
 
   if (!isAdmin) {
-    alert("🔒 Hanya Admin yang boleh menambah barang.");
+
+    alert(
+      "🔒 Hanya Admin yang boleh menambah barang."
+    );
+
     return;
   }
+
+  // ==========================
+  // VALIDASI
+  // ==========================
 
   if (!nama) {
+
     alert("Nama barang belum diisi!");
+
     return;
   }
 
-  if (!harga || harga < 0) {
+  if (isNaN(harga) || harga < 0) {
+
     alert("Harga belum benar!");
+
     return;
   }
 
-  if (stok < 0 || isNaN(stok)) {
+  if (isNaN(stok) || stok < 0) {
+
     alert("Stok belum benar!");
+
     return;
   }
+
+  if (!expired) {
+
+    alert(
+      "Tanggal expired belum diisi!"
+    );
+
+    return;
+  }
+
+  // ==========================
+  // SIMPAN FIRESTORE
+  // ==========================
 
   try {
+
     await db.collection("barang").add({
+
       nama: nama,
+
       harga: harga,
-      stok: stok
+
+      stok: stok,
+
+      barcode: barcode,
+
+      expired: expired
+
     });
 
-    alert("Barang berhasil ditambahkan!");
+    alert(
+      "✅ Barang berhasil ditambahkan!"
+    );
 
-    document.getElementById("namaBarangBaru").value = "";
-    document.getElementById("hargaBarangBaru").value = "";
-    document.getElementById("stokBarangBaru").value = "";
+    // Kosongkan form
+
+    document.getElementById(
+      "namaBarangBaru"
+    ).value = "";
+
+    document.getElementById(
+      "hargaBarangBaru"
+    ).value = "";
+
+    document.getElementById(
+      "stokBarangBaru"
+    ).value = "";
+
+    document.getElementById(
+      "barcodeBarangBaru"
+    ).value = "";
+
+    document.getElementById(
+      "expiredBarangBaru"
+    ).value = "";
 
   } catch (error) {
+
     console.error(error);
-    alert("Gagal menambahkan barang: " + error.message);
+
+    alert(
+      "❌ Gagal menambahkan barang:\n" +
+      error.message
+    );
+
   }
+  }
+
+  function cekExpired(expired) {
+
+  if (!expired) {
+
+    return {
+      expired: false,
+      segera: false,
+      teks: "⚠️ Belum ada tanggal expired",
+      warna: "#e65100"
+    };
+
+  }
+
+  const sekarang = new Date();
+
+  sekarang.setHours(0, 0, 0, 0);
+
+  const tanggalExpired =
+    new Date(expired + "T00:00:00");
+
+  tanggalExpired.setHours(0, 0, 0, 0);
+
+  const selisih =
+    tanggalExpired - sekarang;
+
+  const hari =
+    Math.ceil(
+      selisih / (1000 * 60 * 60 * 24)
+    );
+
+  // ==========================
+  // SUDAH EXPIRED
+  // ==========================
+
+  if (hari < 0) {
+
+    return {
+
+      expired: true,
+
+      segera: false,
+
+      hari: hari,
+
+      teks:
+        "🔴 SUDAH EXPIRED",
+
+      warna: "#c62828"
+
+    };
+
+  }
+
+  // ==========================
+  // EXPIRED HARI INI
+  // ==========================
+
+  if (hari === 0) {
+
+    return {
+
+      expired: true,
+
+      segera: false,
+
+      hari: hari,
+
+      teks:
+        "🔴 EXPIRED HARI INI",
+
+      warna: "#c62828"
+
+    };
+
+  }
+
+  // ==========================
+  // 30 HARI
+  // ==========================
+
+  if (hari <= 30) {
+
+    return {
+
+      expired: false,
+
+      segera: true,
+
+      hari: hari,
+
+      teks:
+        "🟡 Expired dalam " +
+        hari +
+        " hari",
+
+      warna: "#ef6c00"
+
+    };
+
+  }
+
+  // ==========================
+  // MASIH AMAN
+  // ==========================
+
+  return {
+
+    expired: false,
+
+    segera: false,
+
+    hari: hari,
+
+    teks:
+      "🟢 Expired: " +
+      formatTanggal(expired),
+
+    warna: "#2e7d32"
+
+  };
+
+  }
+
+  function formatTanggal(tanggal) {
+
+  if (!tanggal) return "-";
+
+  const d =
+    new Date(tanggal + "T00:00:00");
+
+  return d.toLocaleDateString(
+    "id-ID",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }
+  );
+
   }
 
   async function editBarang(id) {
@@ -2659,6 +2954,170 @@ function pindahHalamanSwipe(arah) {
   showPage(idHalaman);
 
 }
+
+  async function importExcelBarang() {
+
+  if (!isAdmin) {
+
+    alert(
+      "🔒 Hanya Admin yang boleh import barang."
+    );
+
+    return;
+  }
+
+  const fileInput =
+    document.getElementById("fileExcel");
+
+  if (!fileInput.files.length) {
+
+    alert(
+      "Silakan pilih file Excel terlebih dahulu."
+    );
+
+    return;
+  }
+
+  const file =
+    fileInput.files[0];
+
+  const status =
+    document.getElementById("statusImport");
+
+  status.innerHTML =
+    "⏳ Membaca file Excel...";
+
+  try {
+
+    const data =
+      await file.arrayBuffer();
+
+    const workbook =
+      XLSX.read(data, {
+        type: "array"
+      });
+
+    const namaSheet =
+      workbook.SheetNames[0];
+
+    const sheet =
+      workbook.Sheets[namaSheet];
+
+    const rows =
+      XLSX.utils.sheet_to_json(sheet);
+
+    if (!rows.length) {
+
+      status.innerHTML =
+        "❌ Excel kosong.";
+
+      return;
+    }
+
+    let berhasil = 0;
+    let gagal = 0;
+
+    for (const row of rows) {
+
+      const nama =
+        String(
+          row.Nama ||
+          row.nama ||
+          ""
+        ).trim();
+
+      const harga =
+        Number(
+          row.Harga ||
+          row.harga ||
+          0
+        );
+
+      const stok =
+        Number(
+          row.Stok ||
+          row.stok ||
+          0
+        );
+
+      const barcode =
+        String(
+          row.Barcode ||
+          row.barcode ||
+          ""
+        ).trim();
+
+      const expired =
+        String(
+          row.Expired ||
+          row.expired ||
+          ""
+        ).trim();
+
+      if (
+        !nama ||
+        isNaN(harga) ||
+        isNaN(stok) ||
+        !expired
+      ) {
+
+        gagal++;
+
+        continue;
+      }
+
+      await db.collection("barang").add({
+
+        nama: nama,
+
+        harga: harga,
+
+        stok: stok,
+
+        barcode: barcode,
+
+        expired: expired
+
+      });
+
+      berhasil++;
+
+    }
+
+    status.innerHTML = `
+      <div style="
+        margin-top:10px;
+        padding:12px;
+        background:#e8f5e9;
+        border-radius:8px;
+      ">
+        ✅ Import selesai<br><br>
+
+        Berhasil:
+        <b>${berhasil}</b><br>
+
+        Gagal:
+        <b>${gagal}</b>
+      </div>
+    `;
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.innerHTML = `
+      <div style="
+        color:#c62828;
+        margin-top:10px;
+      ">
+        ❌ Import gagal:<br>
+        ${error.message}
+      </div>
+    `;
+
+  }
+
+  }
 
 </script>
 
